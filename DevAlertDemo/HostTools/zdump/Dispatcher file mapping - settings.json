@@ -1,0 +1,50 @@
+{
+  "coreProvider": null,
+  "backendProvider": "DevAlert Evaluation",
+  "settings": [
+    {
+      "key": "Dispatcher.CacheDirectory",
+      "value": "C:\\Users\\johan\\AppData\\Roaming\\PercepioDevAlertDispatcher\\Cache"
+    },
+    {
+      "key": "Dispatcher.CacheTimeInDays",
+      "value": "14"
+    },
+    {
+      "key": "CoreDevAlert.Email",
+      "value": "johan.kraft@percepio.com"
+    },
+    {
+      "key": "CoreDevAlert.EncryptedPassword",
+      "value": "zJmQvYgkjH\u002BWf0og5TXZU0P0KVyOPMvpKV5DV\u002BHpRT37dg\u002BbPyqJr81HwZ0EyK/NMWcN\u002BOXAy1Ef0BPcvR7i3WTnuuFFEEGYWTmzz5ZcmCCcQNaxSIsBJx7mXZAi1NNH/YxgkxhM0vZvAjV02fRPs6YU8W9z1sMO/2fldjfcCsU="
+    },
+    {
+      "key": "CoreDevAlert.RememberPassword",
+      "value": "True"
+    },
+    {
+      "key": "CoreDevAlert.ConfigUrl",
+      "value": "https://config.devalert.io/2021-04-19/"
+    },
+    {
+      "key": "Dispatcher.AfterLaunchPolicy",
+      "value": "KeepOpenForAdditionalPayloads"
+    },
+    {
+      "key": "Dispatcher.ShowLog",
+      "value": "False"
+    },
+    {
+      "key": "FileMapping__0",
+      "value": "{\r\n  \u0022enabled\u0022: true,\r\n  \u0022priority\u0022: 1,\r\n  \u0022description\u0022: \u0022zdump\u0022,\r\n  \u0022mappingType\u0022: 0,\r\n  \u0022mappingDetails\u0022: \u0022zcoredump.bin\u0022,\r\n  \u0022startupFolder\u0022: \u0022\u0022,\r\n  \u0022executable\u0022: \u0022C:\\\\Program Files\\\\WSL\\\\wsl.exe\u0022,\r\n  \u0022shellExecutable\u0022: false,\r\n  \u0022createWindow\u0022: true,\r\n  \u0022parameters\u0022: \u0022~ zdump-test/zdump.sh zdump-test/example_data/aws_demos.elf \\u0027${file}\\u0027 windowspath\u0022\r\n}"
+    },
+    {
+      "key": "FileMapping__1",
+      "value": "{\r\n  \u0022enabled\u0022: true,\r\n  \u0022priority\u0022: 2,\r\n  \u0022description\u0022: \u0022CrashDebug (gdb)\u0022,\r\n  \u0022mappingType\u0022: 1,\r\n  \u0022mappingDetails\u0022: \u0022dmp\u0022,\r\n  \u0022startupFolder\u0022: \u0022\u0022,\r\n  \u0022executable\u0022: \u0022C:\\\\da-tools\\\\crash_debug.bat\u0022,\r\n  \u0022shellExecutable\u0022: false,\r\n  \u0022createWindow\u0022: true,\r\n  \u0022parameters\u0022: \u0022C:/da-tools/dropbox-elf-archive/${revision}.elf ${file} --gdb\u0022\r\n}"
+    },
+    {
+      "key": "FileMapping__2",
+      "value": "{\r\n  \u0022enabled\u0022: true,\r\n  \u0022priority\u0022: 3,\r\n  \u0022description\u0022: \u0022Tracealyzer\u0022,\r\n  \u0022mappingType\u0022: 1,\r\n  \u0022mappingDetails\u0022: \u0022psfs\u0022,\r\n  \u0022startupFolder\u0022: \u0022\u0022,\r\n  \u0022executable\u0022: \u0022C:\\\\Program Files\\\\Percepio\\\\Tracealyzer 4\\\\Tracealyzer.exe\u0022,\r\n  \u0022shellExecutable\u0022: false,\r\n  \u0022createWindow\u0022: true,\r\n  \u0022parameters\u0022: \u0022/open ${file}\u0022\r\n}"
+    }
+  ]
+}
