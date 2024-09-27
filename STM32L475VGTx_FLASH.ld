@@ -92,13 +92,6 @@ SECTIONS
     . = ALIGN(8);
   } >FLASH
   
-  /* Makes the GCC Build ID accessible in the code */
-  .gnu_build_id :
-  {
-    PROVIDE(build_id_elf_note = .);
-    *(.note.gnu.build-id)
-  } > FLASH
-
   .ARM.extab (READONLY) : 
   { 
   . = ALIGN(8);

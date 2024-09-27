@@ -56,13 +56,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 #include "stm32l475e_iot01.h"
-#include "stm32l475e_iot01_accelero.h"
-#include "stm32l475e_iot01_psensor.h"
-#include "stm32l475e_iot01_gyro.h"
-#include "stm32l475e_iot01_hsensor.h"
-#include "stm32l475e_iot01_tsensor.h"
-#include "stm32l475e_iot01_magneto.h"
-#include "vl53l0x_proximity.h"
+//#include "stm32l475e_iot01_accelero.h"
+//#include "stm32l475e_iot01_psensor.h"
+//#include "stm32l475e_iot01_gyro.h"
+//#include "stm32l475e_iot01_hsensor.h"
+//#include "stm32l475e_iot01_tsensor.h"
+//#include "stm32l475e_iot01_magneto.h"
+//#include "vl53l0x_proximity.h"
 
 #include <string.h>
 #include <stdlib.h>

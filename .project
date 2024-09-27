@@ -28,658 +28,577 @@
 		<link>
 			<name>main.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/main.c</locationURI>
-		</link>
-		<link>
-			<name>config_files/FreeRTOSConfig.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/config_files/FreeRTOSConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/main.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/event_groups.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/event_groups.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/event_groups.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/list.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/list.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/list.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/queue.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/queue.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/queue.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/stream_buffer.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/stream_buffer.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/stream_buffer.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/tasks.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/tasks.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/tasks.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/timers.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/timers.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/timers.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/CrashCatcher/CrashCatcher.c</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/CrashCatcher/Core/src/CrashCatcher.c</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/CrashCatcher/CrashCatcher.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/CrashCatcher/include/CrashCatcher.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/CrashCatcher/CrashCatcherPriv.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/CrashCatcher/Core/src/CrashCatcherPriv.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/CrashCatcher/CrashCatcher_armv7m.S</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/CrashCatcher/Core/src/CrashCatcher_armv7m.S</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/DFM/config</name>
+			<name>DemoLibs/DFM/config</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfm.c</name>
+			<name>DemoLibs/DFM/dfm.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfm.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfm.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmAlert.c</name>
+			<name>DemoLibs/DFM/dfmAlert.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmAlert.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmAlert.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmCloud.c</name>
+			<name>DemoLibs/DFM/dfmCloud.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmCloud.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmCloud.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmCrashCatcher.c</name>
+			<name>DemoLibs/DFM/dfmCrashCatcher.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmCrashCatcher.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmCrashCatcher.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmEntry.c</name>
+			<name>DemoLibs/DFM/dfmEntry.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmEntry.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmEntry.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmKernelPort.c</name>
+			<name>DemoLibs/DFM/dfmKernelPort.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/kernelports/FreeRTOS/dfmKernelPort.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/dfmKernelPort.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmSession.c</name>
+			<name>DemoLibs/DFM/dfmSession.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmSession.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmSession.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmStorage.c</name>
+			<name>DemoLibs/DFM/dfmStorage.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/dfmStorage.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmStorage.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/dfmStoragePort.c</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/storageports/FLASH/dfmStoragePort.c</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/DFM/include</name>
+			<name>DemoLibs/DFM/include</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/.gitattributes</name>
+			<name>DemoLibs/TraceRecorder/.gitattributes</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/.gitattributes</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/.gitattributes</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config</name>
+			<name>DemoLibs/TraceRecorder/config</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include</name>
+			<name>DemoLibs/TraceRecorder/include</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcAssert.c</name>
+			<name>DemoLibs/TraceRecorder/trcAssert.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcAssert.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcAssert.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcCounter.c</name>
+			<name>DemoLibs/TraceRecorder/trcCounter.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcCounter.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcCounter.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcDependency.c</name>
+			<name>DemoLibs/TraceRecorder/trcDependency.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcDependency.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcDependency.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcDiagnostics.c</name>
+			<name>DemoLibs/TraceRecorder/trcDiagnostics.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcDiagnostics.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcDiagnostics.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcEntryTable.c</name>
+			<name>DemoLibs/TraceRecorder/trcEntryTable.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcEntryTable.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcEntryTable.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcError.c</name>
+			<name>DemoLibs/TraceRecorder/trcError.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcError.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcError.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcEvent.c</name>
+			<name>DemoLibs/TraceRecorder/trcEvent.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcEvent.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcEvent.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcEventBuffer.c</name>
+			<name>DemoLibs/TraceRecorder/trcEventBuffer.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcEventBuffer.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcEventBuffer.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcExtension.c</name>
+			<name>DemoLibs/TraceRecorder/trcExtension.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcExtension.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcExtension.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcHardwarePort.c</name>
+			<name>DemoLibs/TraceRecorder/trcHardwarePort.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcHardwarePort.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcHardwarePort.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcHeap.c</name>
+			<name>DemoLibs/TraceRecorder/trcHeap.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcHeap.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcHeap.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcISR.c</name>
+			<name>DemoLibs/TraceRecorder/trcISR.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcISR.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcISR.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcInternalEventBuffer.c</name>
+			<name>DemoLibs/TraceRecorder/trcInternalEventBuffer.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcInternalEventBuffer.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcInternalEventBuffer.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcInterval.c</name>
+			<name>DemoLibs/TraceRecorder/trcInterval.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcInterval.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcInterval.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcKernelPort.c</name>
+			<name>DemoLibs/TraceRecorder/trcKernelPort.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcKernelPort.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcKernelPort.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcMultiCoreEventBuffer.c</name>
+			<name>DemoLibs/TraceRecorder/trcMultiCoreEventBuffer.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcMultiCoreEventBuffer.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcMultiCoreEventBuffer.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcObject.c</name>
+			<name>DemoLibs/TraceRecorder/trcObject.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcObject.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcObject.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcPrint.c</name>
+			<name>DemoLibs/TraceRecorder/trcPrint.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcPrint.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcPrint.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcSnapshotRecorder.c</name>
+			<name>DemoLibs/TraceRecorder/trcSnapshotRecorder.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcSnapshotRecorder.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcSnapshotRecorder.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcStackMonitor.c</name>
+			<name>DemoLibs/TraceRecorder/trcStackMonitor.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcStackMonitor.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcStackMonitor.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcStateMachine.c</name>
+			<name>DemoLibs/TraceRecorder/trcStateMachine.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcStateMachine.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcStateMachine.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcStaticBuffer.c</name>
+			<name>DemoLibs/TraceRecorder/trcStaticBuffer.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcStaticBuffer.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcStaticBuffer.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcStreamPort.c</name>
+			<name>DemoLibs/TraceRecorder/trcStreamPort.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/streamports/RingBuffer/trcStreamPort.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/streamports/RingBuffer/trcStreamPort.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcStreamingRecorder.c</name>
+			<name>DemoLibs/TraceRecorder/trcStreamingRecorder.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcStreamingRecorder.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcStreamingRecorder.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcString.c</name>
+			<name>DemoLibs/TraceRecorder/trcString.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcString.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcString.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcTask.c</name>
+			<name>DemoLibs/TraceRecorder/trcTask.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcTask.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcTask.c</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/trcTimestamp.c</name>
+			<name>DemoLibs/TraceRecorder/trcTimestamp.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/trcTimestamp.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/trcTimestamp.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/FreeRTOS.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/FreeRTOS.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/FreeRTOS.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/StackMacros.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/StackMacros.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/StackMacros.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/atomic.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/atomic.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/atomic.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/croutine.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/croutine.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/croutine.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/deprecated_definitions.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/deprecated_definitions.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/deprecated_definitions.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/event_groups.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/event_groups.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/event_groups.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/list.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/list.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/list.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/message_buffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/message_buffer.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/message_buffer.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/mpu_prototypes.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/mpu_prototypes.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/mpu_prototypes.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/mpu_wrappers.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/mpu_wrappers.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/mpu_wrappers.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/portable.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/portable.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/portable.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/projdefs.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/projdefs.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/projdefs.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/queue.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/queue.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/queue.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/semphr.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/semphr.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/semphr.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/stack_macros.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/stack_macros.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/stack_macros.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/stream_buffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/stream_buffer.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/stream_buffer.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/task.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/task.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/task.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/timers.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/include/timers.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/include/timers.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/logging/iot_logging.c</name>
+			<name>DemoLibs/DFM/config/dfmConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/libraries/logging/iot_logging.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/config/dfmConfig.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/logging/iot_logging_task_dynamic_buffers.c</name>
+			<name>DemoLibs/DFM/include/dfm.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/libraries/logging/iot_logging_task_dynamic_buffers.c</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfm.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/config/dfmConfig.h</name>
+			<name>DemoLibs/DFM/include/dfmAlert.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/config/dfmConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmAlert.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfm.h</name>
+			<name>DemoLibs/DFM/include/dfmCloud.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfm.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCloud.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmAlert.h</name>
+			<name>DemoLibs/DFM/include/dfmCloudPort.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmAlert.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/cloudports/AWS_MQTT/include/dfmCloudPort.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmCloud.h</name>
+			<name>DemoLibs/DFM/include/dfmCodes.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmCloud.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCodes.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmCloudPort.h</name>
+			<name>DemoLibs/DFM/include/dfmCrashCatcher.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/kernelports/FreeRTOS/cloudports/AWS_MQTT/include/dfmCloudPort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCrashCatcher.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmCodes.h</name>
+			<name>DemoLibs/DFM/include/dfmDefines.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmCodes.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmDefines.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmCrashCatcher.h</name>
+			<name>DemoLibs/DFM/include/dfmEntry.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmCrashCatcher.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmEntry.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmDefines.h</name>
+			<name>DemoLibs/DFM/include/dfmKernelPort.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmDefines.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/include/dfmKernelPort.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmEntry.h</name>
+			<name>DemoLibs/DFM/include/dfmSession.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmEntry.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmSession.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmKernelPort.h</name>
+			<name>DemoLibs/DFM/include/dfmStorage.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/kernelports/FreeRTOS/include/dfmKernelPort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmStorage.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmSession.h</name>
+			<name>DemoLibs/DFM/include/dfmTypes.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmSession.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmTypes.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmStorage.h</name>
+			<name>DemoLibs/TraceRecorder/config/trcConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmStorage.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/config/trcConfig.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmStoragePort.h</name>
+			<name>DemoLibs/TraceRecorder/config/trcKernelPortConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/storageports/FLASH/include/dfmStoragePort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/config/trcKernelPortConfig.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/DFM/include/dfmTypes.h</name>
+			<name>DemoLibs/TraceRecorder/config/trcKernelPortStreamingConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/include/dfmTypes.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/config/trcKernelPortStreamingConfig.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config/trcConfig.h</name>
+			<name>DemoLibs/TraceRecorder/config/trcStreamPortConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/config/trcConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/streamports/RingBuffer/config/trcStreamPortConfig.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config/trcKernelPortConfig.h</name>
+			<name>DemoLibs/TraceRecorder/config/trcStreamingConfig.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/config/trcKernelPortConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/config/trcStreamingConfig.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config/trcKernelPortStreamingConfig.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcAssert.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/config/trcKernelPortStreamingConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcAssert.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config/trcStreamPortConfig.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcCounter.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/streamports/RingBuffer/config/trcStreamPortConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcCounter.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/config/trcStreamingConfig.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcDefines.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/config/trcStreamingConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcDefines.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcAssert.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcDependency.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcAssert.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcDependency.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcCounter.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcDiagnostics.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcCounter.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcDiagnostics.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcDefines.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcEntryTable.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcDefines.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcEntryTable.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcDependency.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcError.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcDependency.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcError.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcDiagnostics.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcEvent.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcDiagnostics.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcEvent.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcEntryTable.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcEventBuffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcEntryTable.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcEventBuffer.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcError.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcExtension.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcError.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcExtension.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcEvent.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcHardwarePort.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcEvent.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcHardwarePort.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcEventBuffer.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcHeap.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcEventBuffer.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcHeap.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcExtension.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcISR.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcExtension.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcISR.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcHardwarePort.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcInternalEventBuffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcHardwarePort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcInternalEventBuffer.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcHeap.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcInterval.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcHeap.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcInterval.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcISR.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcKernelPort.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcISR.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcKernelPort.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcInternalEventBuffer.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcMultiCoreEventBuffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcInternalEventBuffer.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcMultiCoreEventBuffer.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcInterval.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcObject.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcInterval.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcObject.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcKernelPort.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcPrint.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcKernelPort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcPrint.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcMultiCoreEventBuffer.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcRecorder.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcMultiCoreEventBuffer.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcRecorder.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcObject.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcStackMonitor.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcObject.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcStackMonitor.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcPrint.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcStateMachine.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcPrint.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcStateMachine.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcRecorder.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcStaticBuffer.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcRecorder.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcStaticBuffer.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcStackMonitor.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcStreamPort.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcStackMonitor.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/streamports/RingBuffer/include/trcStreamPort.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcStateMachine.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcString.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcStateMachine.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcString.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcStaticBuffer.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcTask.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcStaticBuffer.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcTask.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcStreamPort.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcTimestamp.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/streamports/RingBuffer/include/trcStreamPort.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcTimestamp.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcString.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcTypes.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcString.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcTypes.h</locationURI>
 		</link>
 		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcTask.h</name>
+			<name>DemoLibs/TraceRecorder/include/trcUtility.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcTask.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcTimestamp.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcTimestamp.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcTypes.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcTypes.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/TraceRecorder/include/trcUtility.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/TraceRecorder/include/trcUtility.h</locationURI>
+			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/include/trcUtility.h</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/portable/MemMang/heap_5.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/portable/MemMang/heap_5.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/logging/include/iot_logging_task.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/libraries/logging/include/iot_logging_task.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/logging/include/logging_levels.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/libraries/logging/include/logging_levels.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/logging/include/logging_stack.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/libraries/logging/include/logging_stack.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/DFM/cloudports/Serial/dfmCloudPort.c</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/cloudports/Serial/dfmCloudPort.c</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/DFM/cloudports/Serial/dfmCloudPort.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/cloudports/Serial/include/dfmCloudPort.h</locationURI>
-		</link>
-		<link>
-			<name>DevAlertDemo/DFM/cloudports/Serial/dfmCloudPortConfig.h</name>
-			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/DevAlertDemo/DFM/cloudports/Serial/config/dfmCloudPortConfig.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/portable/MemMang/heap_5.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/port.c</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/portable/GCC/ARM_CM4F/port.c</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/portable/GCC/ARM_CM4F/port.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</name>
 			<type>1</type>
-			<locationURI>copy_PROJECT_LOC/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</locationURI>
+			<locationURI>PROJECT_LOC/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PROJECT_LOC</name>
-			<value>$%7BPARENT-3-ECLIPSE_HOME%7D/src/github-repos/detect_basic_demo</value>
-		</variable>
-	</variableList>
 </projectDescription>
