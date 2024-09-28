@@ -39,6 +39,7 @@
 
 #include "demo_states.h"
 #include "demo_user_events.h"
+#include "demo_isr.h"
 
 
 #define mainLOGGING_TASK_PRIORITY                         ( configMAX_PRIORITIES - 1 )
@@ -226,6 +227,7 @@ int main( void )
 
     BSP_LED_Off( LED_GREEN );
 
+    DemoISRInit();
     DemoUserEventsInit();
     DemoStatesInit();
 
@@ -402,10 +404,6 @@ void Error_Handler( void )
         BSP_LED_Toggle( LED_GREEN );
         HAL_Delay( 200 );
     }
-}
-
-void vApplicationIdleHook( void )
-{
 }
 
 void vMainUARTPrintString( char * pcString )
@@ -592,3 +590,9 @@ static void SystemClock_Config( void )
     /* Enable MSI PLL mode. */
     HAL_RCCEx_EnableMSIPLLMode();
 }
+
+void DemoSimulateExecutionTime(int n)
+{
+	for (volatile int dummy = 0; dummy < n; dummy++);
+}
+

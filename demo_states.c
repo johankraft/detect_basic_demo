@@ -32,12 +32,13 @@
 
 #include "demo_states.h"
 
-
 void DemoStatesInit(void);
 void DemoSetMotorState(int is_on);
 void DemoSetBrakeState(int is_on);
 void DemoTaskStates(void* argument);
 void DemoSimulateExecutionTime(int n);
+
+extern void DemoSimulateExecutionTime(int n);
 
 TraceStateMachineHandle_t statemachine_motor;
 TraceStateMachineStateHandle_t motor_state_handle[3];
@@ -95,10 +96,6 @@ void DemoSetBrakeState(int state)
 	DemoSimulateExecutionTime(1000);
 }
 
-void DemoSimulateExecutionTime(int n)
-{
-	for (volatile int dummy = 0; dummy < n; dummy++);
-}
 
 void DemoTaskStates(void* argument)
 {
