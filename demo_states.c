@@ -61,7 +61,7 @@ int DemoGetBrakeState(void)
 
 void DemoSetMotorState(int state)
 {
-	DemoSimulateExecutionTime(1500);
+	DemoSimulateExecutionTime(5000);
 
 	// Valid states are 0, 1, 2
 	if (state < 0 || state > 2)
@@ -74,13 +74,13 @@ void DemoSetMotorState(int state)
 
 	xTraceStateMachineSetState(statemachine_motor, motor_state_handle[state]);
 
-	DemoSimulateExecutionTime(500);
+	DemoSimulateExecutionTime(1500);
 }
 
 
 void DemoSetBrakeState(int state)
 {
-	DemoSimulateExecutionTime(1000);
+	DemoSimulateExecutionTime(3000);
 
 	// Valid states are 0, 1, 2
 	if (state < 0 || state > 2)
@@ -93,7 +93,7 @@ void DemoSetBrakeState(int state)
 
 	xTraceStateMachineSetState(statemachine_brake, brake_state_handle[state]);
 
-	DemoSimulateExecutionTime(1000);
+	DemoSimulateExecutionTime(2000);
 }
 
 
@@ -137,8 +137,8 @@ void DemoTaskStates(void* argument)
 
 void DemoStatesInit(void)
 {
-   if( xTaskCreate( DemoTaskStates, "DemoState", 1000, NULL, 6, NULL ) != pdPASS )
+   if( xTaskCreate( DemoTaskStates, "Demo-States", 128, NULL, 2, NULL ) != pdPASS )
    {
-	   configPRINT_STRING(("Failed creating DemoTaskStates."));
+	   configPRINT_STRING(("Failed creating Demo-States."));
    }
 }

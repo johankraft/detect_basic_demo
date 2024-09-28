@@ -228,8 +228,8 @@ int main( void )
     BSP_LED_Off( LED_GREEN );
 
     DemoISRInit();
-    DemoUserEventsInit();
     DemoStatesInit();
+    DemoUserEventsInit();
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
      * including the WiFi initialization, is performed in the RTOS daemon task

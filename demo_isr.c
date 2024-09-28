@@ -25,13 +25,26 @@
 #include "trcRecorder.h"
 #include "demo_isr.h"
 
-TraceISRHandle_t xISRHandle = 0;
+TraceISRHandle_t xISRHandle1 = 0;
+TraceISRHandle_t xISRHandle2 = 0;
 
 
 /* Example of tracing an ISR handler. */
-void ExampleISRHandler(void)
+void ExampleISRHandler1(void)
 {
-	xTraceISRBegin(xISRHandle);
+	xTraceISRBegin(xISRHandle1);
+
+	/* ISR code... */
+	DemoSimulateExecutionTime(2000);
+
+	xTraceISREnd(0);
+}
+
+
+/* Tracing a second ISR handler. */
+void ExampleISRHandler2(void)
+{
+	xTraceISRBegin(xISRHandle2);
 
 	/* ISR code... */
 	DemoSimulateExecutionTime(2500);
@@ -39,22 +52,32 @@ void ExampleISRHandler(void)
 	xTraceISREnd(0);
 }
 
+
 /* This is called by the FreeRTOS Tick Hook to simulate an example interrupt.*/
 void vApplicationTickHook( void )
 {
 	static int tickCounter = 0;
 
 	// If this part of the demo has not (yet) been enabled...
-	if (xISRHandle == NULL)
+	if (xISRHandle1 == NULL)
 		return;
 
-	if (tickCounter++ % 10 == 0)
+	if (tickCounter % 10 == 0)
 	{
-		ExampleISRHandler();
+		ExampleISRHandler1();
 	}
+
+	if (tickCounter % 6 == 0)
+	{
+		ExampleISRHandler2();
+	}
+
+	tickCounter++;
 }
 
 void DemoISRInit(void)
 {
-	xTraceISRRegister("Interrupt", 0, &xISRHandle);
+	// Second arguments (1 and 2) = Interrupt priority level, Only used for sorting the Tracealyzer columns.
+	xTraceISRRegister("ISR1", 1, &xISRHandle1);
+	xTraceISRRegister("ISR2", 2, &xISRHandle2);
 }

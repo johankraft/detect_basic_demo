@@ -19,6 +19,8 @@
 /* Percepio includes */
 #include "trcRecorder.h"
 
+extern void DemoSimulateExecutionTime(int n);
+
 void DemoUserEvents(void* argument)
 {
 	TraceStringHandle_t log_channel;
@@ -30,13 +32,21 @@ void DemoUserEvents(void* argument)
 
     for(;;)
     {
-    	// The simplest API function for logging. Similar to "puts".
-    	xTracePrint(log_channel, "Something happened.");
 
-    	vTaskDelay(5);
+    	if (counter % 4 == 0)
+    	{
+        	// The simplest API function for logging. Similar to "puts".
+    		xTracePrint(log_channel, "XYZ happened.");
+    	}
 
-    	// The "F" variant allows for data arguments, similar to printf.
-    	xTracePrintF(counter_channel, "Value: %d", counter++);
+    	DemoSimulateExecutionTime(1000);
+
+    	// xTracePrintF allows for data arguments, similar to printf.
+    	xTracePrintF(counter_channel, "Value: %d", counter);
+
+    	counter = (counter+1) % 10;
+
+    	DemoSimulateExecutionTime(1000);
 
     	vTaskDelay(5);
     }
@@ -45,8 +55,8 @@ void DemoUserEvents(void* argument)
 
 void DemoUserEventsInit(void)
 {
-	if( xTaskCreate( DemoUserEvents, "DemoUserEvents", 1000, NULL, 5, NULL ) != pdPASS )
+	if( xTaskCreate( DemoUserEvents, "Demo-UserEvents", 128, NULL, 3, NULL ) != pdPASS )
 	{
-		configPRINT_STRING(("Failed creating DemoUserEvents."));
+		configPRINT_STRING(("Failed creating Demo-UserEvents."));
 	}
 }
