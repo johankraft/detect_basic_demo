@@ -211,69 +211,11 @@ void ButtonTask(void* argument)
     }
 }
 
+//xTraceStringRegister("Log Channel", &log_chn);
+//xTracePrintF(log_chn, "counter: %d", counter);
 
-/*** Adding a Task to show some TraceRecorder features ***********************/
+TraceStringHandle_t log_channel;
 
-#define nMSG 5
-#define nSTATE 3
-
-const char * messages[nMSG] = {	"SetMode A",
-								"SetOptionsFlags X,Y",
-								"Certificate checksum 123456789ABCDEF",
-								"SetRemoteIP 127.0.0.1",
-								"SetRemotePort 8888"};
-
-const char * states[nSTATE] = {	"State A",
-						   	    "State B",
-							    "State C"};
-
-void prvRXTask(void* argument)
-{
-	volatile int dummy;
-
-	int counter = 0;
-	int state = 0;
-	int len = 0;
-
-	TraceStringHandle_t command_chn;
-	TraceStateMachineHandle_t myfsm;
-	TraceStateMachineStateHandle_t myfsm_state[5];
-
-	xTraceStringRegister("Command Log", &command_chn);
-
-	/* Trace a state machine (states can span between tasks) */
-	xTraceStateMachineCreate("RX State", &myfsm);
-
-	for (int i = 0; i < nSTATE; i++)
-	{
-		// Register each state name, one for each message
-		xTraceStateMachineStateCreate(myfsm, states[i], &myfsm_state[i]);
-	}
-
-    for(;;)
-    {
-
-    	len = strlen(messages[counter]);
-
-    	// Logging the current "message" to the trace buffer.
-    	xTracePrintF(command_chn, messages[counter]);
-
-    	counter = (counter+1) % nMSG;
-    	state = (state+1) % nSTATE;
-
-    	// Make the task run a bit longer...
-   		for (dummy = 0; dummy < 3000; dummy++);
-
-   		// Log a state transition
-    	xTraceStateMachineSetState(myfsm, myfsm_state[state]);
-
-    	// Make the task run a bit longer...
-    	for (dummy = 0; dummy < (1000 * len); dummy++);
-
-    	vTaskDelay(50);
-    }
-
-}
 
 /**
  * @brief Application runtime entry point.
@@ -284,15 +226,9 @@ int main( void )
      * running.  */
     prvMiscInitialization();
 
-    /* Uses the timestamp source (cycle counter) to initialize pseudo-random number generation. */
-    // srand(TRC_HWTC_COUNT);
-
     BSP_LED_Off( LED_GREEN );
 
-    if( xTaskCreate( prvRXTask, "RX", 1000, NULL, 6, NULL ) != pdPASS )
-    {
-    	configPRINT_STRING(("Failed creating task."));
-    }
+    DemoStatesInit();
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
      * including the WiFi initialization, is performed in the RTOS daemon task
@@ -348,6 +284,9 @@ void vApplicationDaemonTaskStartupHook( void )
     // Can be read from elf file by "arm-none-eabi-readelf -n aws_demos.elf"
     configPRINTF(("Firmware Revision: %s\n", DFM_CFG_FIRMWARE_VERSION));
 
+
+#if (0)
+
     /* Basic demo initialization for serial port upload */
 	xTaskCreate(ButtonTask,       /* Function that implements the task. */
 			   "DemoTask1",          /* Text name for the task. */
@@ -355,6 +294,8 @@ void vApplicationDaemonTaskStartupHook( void )
 			   NULL,    		/* Parameter passed into the task. */
 			   tskIDLE_PRIORITY,/* Priority at which the task is created. */
 			   &xBhjHandle );      /* Used to pass out the created task's handle. */
+
+#endif
 
 	BSP_LED_On( LED_GREEN );
 
