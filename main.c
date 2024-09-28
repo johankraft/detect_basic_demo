@@ -37,6 +37,10 @@
 #include "dfm.h"
 #include "dfmCrashCatcher.h"
 
+#include "demo_states.h"
+#include "demo_user_events.h"
+
+
 #define mainLOGGING_TASK_PRIORITY                         ( configMAX_PRIORITIES - 1 )
 #define mainLOGGING_TASK_STACK_SIZE                       ( 2000 )
 #define mainLOGGING_MESSAGE_QUEUE_LENGTH                  ( 15 )
@@ -211,12 +215,6 @@ void ButtonTask(void* argument)
     }
 }
 
-//xTraceStringRegister("Log Channel", &log_chn);
-//xTracePrintF(log_chn, "counter: %d", counter);
-
-TraceStringHandle_t log_channel;
-
-
 /**
  * @brief Application runtime entry point.
  */
@@ -228,6 +226,7 @@ int main( void )
 
     BSP_LED_Off( LED_GREEN );
 
+    DemoUserEventsInit();
     DemoStatesInit();
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
