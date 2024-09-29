@@ -21,42 +21,39 @@
 
 extern void DemoSimulateExecutionTime(int n);
 
+TraceStringHandle_t log_channel;
+TraceStringHandle_t counter_channel;
+
+void DemoUserEventsUpdate(int tickcounter)
+{
+	if (tickcounter % 4 == 0)
+	{
+		// The simplest API function for logging. Similar to "puts".
+		xTracePrint(log_channel, "XYZ happened.");
+	}
+
+	// xTracePrintF allows for data arguments, similar to printf.
+	xTracePrintF(counter_channel, "Value: %d", tickcounter % 16);
+}
+
 void DemoUserEvents(void* argument)
 {
-	TraceStringHandle_t log_channel;
-	TraceStringHandle_t counter_channel;
-	int counter = 0;
-
-	xTraceStringRegister("Counter", &counter_channel);
-	xTraceStringRegister("Log", &log_channel);
-
     for(;;)
     {
-
-    	if (counter % 4 == 0)
-    	{
-        	// The simplest API function for logging. Similar to "puts".
-    		xTracePrint(log_channel, "XYZ happened.");
-    	}
-
-    	DemoSimulateExecutionTime(1000);
-
-    	// xTracePrintF allows for data arguments, similar to printf.
-    	xTracePrintF(counter_channel, "Value: %d", counter);
-
-    	counter = (counter+1) % 10;
-
-    	DemoSimulateExecutionTime(1000);
-
+    	DemoUserEventsUpdate( xTaskGetTickCount() );
     	vTaskDelay(5);
     }
 }
 
-
 void DemoUserEventsInit(void)
 {
+	xTraceStringRegister("Counter", &counter_channel);
+	xTraceStringRegister("Log", &log_channel);
+
+	/*
 	if( xTaskCreate( DemoUserEvents, "Demo-UserEvents", 128, NULL, 3, NULL ) != pdPASS )
 	{
 		configPRINT_STRING(("Failed creating Demo-UserEvents."));
 	}
+	*/
 }

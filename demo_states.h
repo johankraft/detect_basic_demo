@@ -3,6 +3,8 @@
 
 void DemoStatesInit(void);
 
+void DemoStatesUpdate(int tickcounter);
+
 int DemoGetBrakeState(void);
 
 int DemoGetMotoreState(void);

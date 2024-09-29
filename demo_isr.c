@@ -40,7 +40,6 @@ void ExampleISRHandler1(void)
 	xTraceISREnd(0);
 }
 
-
 /* Tracing a second ISR handler. */
 void ExampleISRHandler2(void)
 {
@@ -54,25 +53,17 @@ void ExampleISRHandler2(void)
 
 
 /* This is called by the FreeRTOS Tick Hook to simulate an example interrupt.*/
-void vApplicationTickHook( void )
+void DemoISRUpdate(int tickcounter)
 {
-	static int tickCounter = 0;
-
-	// If this part of the demo has not (yet) been enabled...
-	if (xISRHandle1 == NULL)
-		return;
-
-	if (tickCounter % 10 == 0)
+	if (tickcounter % 10 == 0)
 	{
 		ExampleISRHandler1();
 	}
 
-	if (tickCounter % 6 == 0)
+	if (tickcounter % 6 == 0)
 	{
 		ExampleISRHandler2();
 	}
-
-	tickCounter++;
 }
 
 void DemoISRInit(void)

@@ -3,5 +3,6 @@
 
 void DemoUserEventsInit(void);
 
+void DemoUserEventsUpdate(int tickcounter);
 
 #endif

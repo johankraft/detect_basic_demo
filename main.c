@@ -28,9 +28,6 @@
 #include "stdint.h"
 #include "stdarg.h"
 
-/* FreeRTOS includes. */
-#include "FreeRTOS.h"
-#include "task.h"
 #include "iot_uart.h"
 
 #include "trcRecorder.h"
@@ -41,45 +38,91 @@
 #include "demo_user_events.h"
 #include "demo_isr.h"
 
-
-#define mainLOGGING_TASK_PRIORITY                         ( configMAX_PRIORITIES - 1 )
-#define mainLOGGING_TASK_STACK_SIZE                       ( 2000 )
-#define mainLOGGING_MESSAGE_QUEUE_LENGTH                  ( 15 )
-
-/* Minimum required WiFi firmware version. */
-#define mainREQUIRED_WIFI_FIRMWARE_WICED_MAJOR_VERSION    ( 3 )
-#define mainREQUIRED_WIFI_FIRMWARE_WICED_MINOR_VERSION    ( 5 )
-#define mainREQUIRED_WIFI_FIRMWARE_WICED_PATCH_VERSION    ( 2 )
-#define mainREQUIRED_WIFI_FIRMWARE_INVENTEK_VERSION       ( 5 )
-#define mainREQUIRED_WIFI_FIRMWARE_DESCRIPTOR_STRING      ( "STM" )
-
-/*-----------------------------------------------------------*/
-
-void vApplicationDaemonTaskStartupHook( void );
-
-/**********************
-* Global Variables
-**********************/
-IotUARTHandle_t xConsoleUart;
-
-/* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config( void );
 static void Console_UART_Init( void );
-
-/**
- * @brief Initializes the STM32L475 IoT node board.
- *
- * Initialization of clock, LEDs, RNG, RTC, and WIFI module.
- */
 static void prvMiscInitialization( void );
 
-/**
- * @brief Initializes the FreeRTOS heap.
+int main( void );
+
+static void DemoUpdate(int tickcounter);
+static void DemoInit(void);
+
+IotUARTHandle_t xConsoleUart;
+
+
+/******************************************************************************
+ * DEMO_TYPE
  *
- * Heap_5 is being used because the RAM is not contiguous, therefore the heap
- * needs to be initialized.  See http://www.freertos.org/a00111.html
- */
+ * Sets if the demo should run on FreeRTOS or using a "bare-metal" superloop.
+ * Valid options.
+ * - DEMO_BAREMETAL: Superloop only, FreeRTOS not used.
+ * - DEMO_FREERTOS: Using FreeRTOS to run the application.
+ *
+ *****************************************************************************/
+#define DEMO_TYPE DEMO_FREERTOS
+
+
+// TODO: For the FreeRTOS version, the current solution of using
+// vApplicationTickHook for running the demo gives a kind of weird trace
+// as there is no task doing the event. Create a task for the superloop.
+
+
+/******************************************************************************
+ * REGISTER_TASK
+ *
+ * The "Task API" functions can be used also for bare-metal systems, for example
+ * to show "idle time" in the trace view and in the CPU Load Graph.
+ *
+ * In this case, we manually register two tasks, "IDLE" and "main-thread".
+ * IDLE represents the time inside HAL_Delay in main_superloop().
+ *
+ * We trace entering and leaving the HAL_Delay call using xTraceTaskSwitch().
+ *
+ * Note: This is only needed for bare-metal systems. When using FreeRTOS (or
+ * another supported RTOS) the kernel instrumentation takes care of the task
+ * tracing automatically.
+ *****************************************************************************/
+#define REGISTER_TASK(ID, name) xTraceTaskRegisterWithoutHandle((void*)ID, name, 0)
+
+#define TASK_IDLE 100
+#define TASK_MAIN 101
+
+
+#if (DEMO_TYPE == DEMO_BAREMETAL)
+
+void main_superloop(void)
+{
+    int counter = 0;
+    while (1)
+    {
+    	DemoUpdate(counter);
+    	counter++;
+
+        xTraceTaskSwitch( (void*)TASK_IDLE, 0);
+    	HAL_Delay(1);
+    	xTraceTaskSwitch( (void*)TASK_MAIN, 0);
+
+    }
+}
+
+#define RUN_DEMO() main_superloop();
+
+#elif (DEMO_TYPE == DEMO_FREERTOS)
+
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+
 static void prvInitializeHeap( void );
+
+#define RUN_DEMO() vTaskStartScheduler();
+
+#elif
+
+#error "Invalid option for DEMO_TYPE."
+
+#endif
+
 
 /*-----------------------------------------------------------*/
 
@@ -157,6 +200,7 @@ void testAssertFailed(char* str)
 
 /*****************************************************************************/
 
+#if (DEMO_TYPE == DEMO_FREERTOS)
 
 TaskHandle_t xBhjHandle = NULL;
 
@@ -215,6 +259,24 @@ void ButtonTask(void* argument)
         }
     }
 }
+#endif
+
+// Called on every "tick" from main_superloop or FreeRTOS tick hook, depending on DEMO_TYPE.
+void DemoUpdate(int counter)
+{
+	DemoISRUpdate(counter);
+   	DemoStatesUpdate(counter);
+   	DemoUserEventsUpdate(counter);
+}
+
+
+// Called once during startup, from main.
+void DemoInit(void)
+{
+    DemoISRInit();
+    DemoStatesInit();
+    DemoUserEventsInit();
+}
 
 /**
  * @brief Application runtime entry point.
@@ -225,59 +287,34 @@ int main( void )
      * running.  */
     prvMiscInitialization();
 
-    BSP_LED_Off( LED_GREEN );
+    /* Initialize Percepio TraceRecorder (stores events to ring buffer) */
+    xTraceEnable(TRC_START);
 
-    DemoISRInit();
-    DemoStatesInit();
-    DemoUserEventsInit();
+    /* Just to set a better name for the main thread...*/
+    REGISTER_TASK(TASK_MAIN, "main-thread");
 
-    /* Start the scheduler.  Initialization that requires the OS to be running,
-     * including the WiFi initialization, is performed in the RTOS daemon task
-     * startup hook. */
-    vTaskStartScheduler();
+    /* Used for tracing the HAL_Delay call in the bare-metal superloop. */
+    REGISTER_TASK(TASK_IDLE, "IDLE");
+
+    /* Trace TASK_MAIN as the executing task... */
+    xTraceTaskSwitch((void*)TASK_MAIN, 0);
+
+    /* Initialize the Percepio DFM library for creating Alerts. */
+    if (xDfmInitializeForLocalUse() == DFM_FAIL)
+    {
+    	configPRINTF(("Failed to initialize DFM\r\n"));
+    }
+
+    DemoInit();
+
+    // Calls main_superloop or starts FreeRTOS, depending on DEMO_TYPE.
+    RUN_DEMO();
 
     return 0;
 }
 /*-----------------------------------------------------------*/
 
-typedef struct {
-    uint32_t namesz;
-    uint32_t descsz;
-    uint32_t type;
-    uint8_t data[];
-} ElfNoteSection_t;
-
-extern const ElfNoteSection_t build_id_elf_note;
-
-/******************************************************************************
- * vDfmSetGCCBuildID - Writes the GCC Build ID to dest.
- * Parameter size is the maximum length (at least 42)
- *
- * * For this to work:
- *   - Add  .gnu_build_id section in linker script (see .ld file in root folder)
- *   - Add  -Wl,--build-id in linker flags
- *
- * Can be read from elf file by "arm-none-eabi-readelf -n aws_demos.elf"
- * to archive the elf file for automated lookup using the Build ID.
- *****************************************************************************/
-
-int vDfmSetGCCBuildID(char* dest, int size)
-{
-	if (size < 42) return DFM_FAIL;
-
-	const uint8_t *build_id_data = &build_id_elf_note.data[build_id_elf_note.namesz];
-
-    // The GNU Build ID is 20 bytes.
-    for (int i = 0; i < 20; i++)
-    {
-    	char byte_str[4] = "";
-        sprintf(byte_str, "%02x", build_id_data[i]);
-        strncat(dest, byte_str, 2);
-    }
-
-    return DFM_SUCCESS;
-}
-
+// TODO: Generalize for bare metal
 void vApplicationDaemonTaskStartupHook( void )
 {
     configPRINTF( ( "\n\n\n\n--- Percepio Detect Basic Demo ---\n" ) );
@@ -286,8 +323,7 @@ void vApplicationDaemonTaskStartupHook( void )
     configPRINTF(("Firmware Revision: %s\n", DFM_CFG_FIRMWARE_VERSION));
 
 
-#if (0)
-
+#if (DEMO_TYPE == DEMO_FREERTOS)
     /* Basic demo initialization for serial port upload */
 	xTaskCreate(ButtonTask,       /* Function that implements the task. */
 			   "DemoTask1",          /* Text name for the task. */
@@ -355,7 +391,9 @@ static void prvMiscInitialization( void )
 
     SystemClock_Config();
 
+#if (DEMO_TYPE == DEMO_FREERTOS)
     prvInitializeHeap();
+#endif
 
 	// Enable usage fault and bus fault exceptions.
 	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk;
@@ -364,16 +402,6 @@ static void prvMiscInitialization( void )
     BSP_PB_Init( BUTTON_USER, BUTTON_MODE_EXTI );
 
     Console_UART_Init();
-
-    /* Initialize Percepio TraceRecorder (stores events to ring buffer) */
-    xTraceEnable(TRC_START);
-
-    /* Initialize DFM (Percepio Detect library) */
-    if (xDfmInitializeForLocalUse() == DFM_FAIL)
-    {
-    	configPRINTF(("Failed to initialize DFM\r\n"));
-    }
-
 }
 
 
@@ -410,6 +438,8 @@ void vMainUARTPrintString( char * pcString )
 {
     iot_uart_write_sync( xConsoleUart, ( uint8_t * ) pcString, strlen( pcString ) );
 }
+
+#if (DEMO_TYPE == DEMO_FREERTOS)
 
 /* The FreeRTOS Heap */
 uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
@@ -449,6 +479,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 	}
 }
 
+
 /*-----------------------------------------------------------*/
 
 void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
@@ -464,6 +495,8 @@ void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
             break;
     }
 }
+
+#endif /* #if (DEMO_TYPE == DEMO_FREERTOS) */
 
 void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef * htim )
 {
@@ -594,5 +627,12 @@ static void SystemClock_Config( void )
 void DemoSimulateExecutionTime(int n)
 {
 	for (volatile int dummy = 0; dummy < n; dummy++);
+}
+
+void vApplicationTickHook(void)
+{
+#if (DEMO_TYPE == DEMO_FREERTOS)
+	DemoUpdate( xTaskGetTickCount() );
+#endif
 }
 

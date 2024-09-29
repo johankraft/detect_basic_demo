@@ -96,8 +96,41 @@ void DemoSetBrakeState(int state)
 	DemoSimulateExecutionTime(2000);
 }
 
+void DemoStatesUpdate(int tickcounter)
+{
+	if (tickcounter % 24 == 0)
+	{
+		DemoSetMotorState(MOTOR_SOFT);
+		DemoSetBrakeState(BRAKE_OFF);
+	}
+
+	if (tickcounter % 24 == 2)
+	{
+		DemoSetMotorState(MOTOR_FULL);
+	}
+
+	if (tickcounter % 24 == 12)
+	{
+		DemoSetMotorState(MOTOR_OFF);
+    	DemoSetBrakeState(BRAKE_SOFT);
+	}
+
+	if (tickcounter % 24 == 14)
+	{
+		DemoSetBrakeState(BRAKE_FULL);
+	}
+}
 
 void DemoTaskStates(void* argument)
+{
+    for(;;)
+    {
+    	DemoStatesUpdate( xTaskGetTickCount() );
+    	vTaskDelay(1);
+    }
+}
+
+void DemoStatesInit(void)
 {
 	/* Registers the two state machines for tracing the state variables. */
 	xTraceStateMachineCreate("Motor State", &statemachine_motor);
@@ -113,32 +146,10 @@ void DemoTaskStates(void* argument)
 	xTraceStateMachineStateCreate(statemachine_brake, "BRAKE_SOFT", &brake_state_handle[BRAKE_SOFT]);
 	xTraceStateMachineStateCreate(statemachine_brake, "BRAKE_OFF", &brake_state_handle[BRAKE_OFF]);
 
-    for(;;)
-    {
-    	DemoSetMotorState(MOTOR_SOFT);
-    	DemoSetBrakeState(BRAKE_OFF);
-
-    	vTaskDelay(2);
-
-    	DemoSetMotorState(MOTOR_FULL);
-
-    	vTaskDelay(10);
-
-    	DemoSetMotorState(MOTOR_OFF);
-    	DemoSetBrakeState(BRAKE_SOFT);
-
-    	vTaskDelay(2);
-
-    	DemoSetBrakeState(BRAKE_FULL);
-
-    	vTaskDelay(10);
-    }
-}
-
-void DemoStatesInit(void)
-{
-   if( xTaskCreate( DemoTaskStates, "Demo-States", 128, NULL, 2, NULL ) != pdPASS )
-   {
+	/*
+	if( xTaskCreate( DemoTaskStates, "Demo-States", 128, NULL, 2, NULL ) != pdPASS )
+	{
 	   configPRINT_STRING(("Failed creating Demo-States."));
-   }
+	}
+	*/
 }
