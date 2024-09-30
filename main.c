@@ -54,12 +54,13 @@ IotUARTHandle_t xConsoleUart;
  * DEMO_TYPE
  *
  * Sets if the demo should run on FreeRTOS or using a "bare-metal" superloop.
- * Valid options.
+ *
+ * Valid options:
  * - DEMO_BAREMETAL: Superloop only, FreeRTOS not used.
  * - DEMO_FREERTOS: Using FreeRTOS to run the application.
  *
  *****************************************************************************/
-#define DEMO_TYPE DEMO_FREERTOS
+#define DEMO_TYPE DEMO_BAREMETAL
 
 
 // TODO: For the FreeRTOS version, the current solution of using
@@ -70,17 +71,17 @@ IotUARTHandle_t xConsoleUart;
 /******************************************************************************
  * REGISTER_TASK
  *
- * The "Task API" functions can be used also for bare-metal systems, for example
- * to show "idle time" in the trace view and in the CPU Load Graph.
+ * The TraceRecorder functions for RTOS task tracing is applicable also for
+ * bare-metal systems, for example to show "idle time" in the trace views.
  *
- * In this case, we manually register two tasks, "IDLE" and "main-thread".
- * IDLE represents the time inside HAL_Delay in main_superloop().
+ * This macro is used to manually register two tasks, "IDLE" and "main-thread".
+ * where IDLE represents the HAL_Delay() call in main_superloop(). The macro
+ * stores a Task ID together with a display name for Tracealyzer. The Task IDs
+ * are passed as arguments to xTraceTaskSwitch() for tracing when entering and
+ * leaving the HAL_Delay call.
  *
- * We trace entering and leaving the HAL_Delay call using xTraceTaskSwitch().
- *
- * Note: This is only needed for bare-metal systems. When using FreeRTOS (or
- * another supported RTOS) the kernel instrumentation takes care of the task
- * tracing automatically.
+ * This is only needed for bare-metal systems. When using a supported RTOS
+ * such as FreeRTOS, the tasks are registered and traced automatically.
  *****************************************************************************/
 #define REGISTER_TASK(ID, name) xTraceTaskRegisterWithoutHandle((void*)ID, name, 0)
 
@@ -116,6 +117,8 @@ void main_superloop(void)
 static void prvInitializeHeap( void );
 
 #define RUN_DEMO() vTaskStartScheduler();
+
+void DemoTaskFreeRTOS(void* argument);
 
 #elif
 
@@ -276,6 +279,16 @@ void DemoInit(void)
     DemoISRInit();
     DemoStatesInit();
     DemoUserEventsInit();
+
+#if (DEMO_TYPE == DEMO_FREERTOS)
+
+	if( xTaskCreate( DemoTaskFreeRTOS, "DemoTask", 128, NULL, 2, NULL ) != pdPASS )
+	{
+	   configPRINT_STRING(("Failed creating DemoTask."));
+	}
+
+#endif
+
 }
 
 /**
@@ -629,10 +642,19 @@ void DemoSimulateExecutionTime(int n)
 	for (volatile int dummy = 0; dummy < n; dummy++);
 }
 
+
+#if (DEMO_TYPE == DEMO_FREERTOS)
+void DemoTaskFreeRTOS(void* argument)
+{
+    for(;;)
+    {
+    	DemoUpdate( xTaskGetTickCount() );
+    	vTaskDelay(1);
+    }
+}
+#endif
+
 void vApplicationTickHook(void)
 {
-#if (DEMO_TYPE == DEMO_FREERTOS)
-	DemoUpdate( xTaskGetTickCount() );
-#endif
 }
 
