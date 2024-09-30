@@ -39,169 +39,20 @@
 #include "demo_user_events.h"
 #include "demo_isr.h"
 
-static void SystemClock_Config( void );
-static void Console_UART_Init( void );
-static void prvMiscInitialization( void );
-
-int main( void );
-
-static void DemoUpdate(int tickcounter);
-static void DemoInit(void);
-
-IotUARTHandle_t xConsoleUart;
-
-
 /******************************************************************************
  * DEMO_TYPE
  *
- * Sets if the demo should run on FreeRTOS or using a "bare-metal" superloop.
+ * Sets if the demo should run on FreeRTOS or using a "bare-metal" loop.
  *
  * Valid options:
  * - DEMO_BAREMETAL: Superloop only, FreeRTOS not used.
  * - DEMO_FREERTOS: Using FreeRTOS to run the application.
- *
  *****************************************************************************/
 #define DEMO_TYPE DEMO_BAREMETAL
 
-
-/******************************************************************************
- * REGISTER_TASK
- *
- * The TraceRecorder functions for RTOS task tracing is applicable also for
- * bare-metal systems, for example to show "idle time" in the trace views.
- *
- * This macro is used to manually register two tasks, "IDLE" and "main-thread".
- * where IDLE represents the HAL_Delay() call in main_superloop(). The macro
- * stores a Task ID together with a display name for Tracealyzer. The Task IDs
- * are passed as arguments to xTraceTaskSwitch() for tracing when entering and
- * leaving the HAL_Delay call.
- *
- * This is only needed for bare-metal systems. When using a supported RTOS
- * such as FreeRTOS, the tasks are registered and traced automatically.
- *****************************************************************************/
-#define REGISTER_TASK(ID, name) xTraceTaskRegisterWithoutHandle((void*)ID, name, 0)
-
-#define TASK_IDLE 100
-#define TASK_MAIN 101
-
-
-#if (DEMO_TYPE == DEMO_BAREMETAL)
-
-volatile int ButtonPressed = 0;
-
-void main_superloop(void)
-{
-    int counter = 0;
-
-    // Set BasePri 0
-    // Enable all interrupts
-    __set_BASEPRI(0);
-    __enable_irq();
-
-    while (1)
-    {
-    	DemoUpdate(counter);
-    	counter++;
-
-        xTraceTaskSwitch( (void*)TASK_IDLE, 0);
-    	HAL_Delay(1);
-    	xTraceTaskSwitch( (void*)TASK_MAIN, 0);
-
-    }
-}
-
-#define RUN_DEMO() main_superloop();
-
-
-// ISR for Button press, wakes up the ButtonTask using a global variable.
-void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
-{
-    if (GPIO_Pin == USER_BUTTON_PIN )
-    {
-    	ButtonPressed = 1;
-    }
-}
-
-
-#elif (DEMO_TYPE == DEMO_FREERTOS)
-
-/* FreeRTOS includes. */
-#include "FreeRTOS.h"
-#include "task.h"
-
-static void DemoAlertTask(void* argument);
-static void prvInitializeHeap( void );
-
-#define RUN_DEMO() vTaskStartScheduler();
-
-void DemoTaskFreeRTOS(void* argument);
-
-TaskHandle_t DemoAlertTaskHandle = NULL;
-
-// ISR for Button press, wakes up the ButtonTask using FreeRTOS task notify call.
-void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
-{
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (GPIO_Pin == USER_BUTTON_PIN )
-    {
-    	vTaskNotifyGiveFromISR( DemoAlertTaskHandle, &xHigherPriorityTaskWoken );
-    }
-}
-
-void DemoAlertTask(void* argument)
-{
-	for(;;)
-    {
-    	ulTaskNotifyTake( pdTRUE, portMAX_DELAY );  /* Block indefinitely. */
-    	DemoAlert();
-    }
-}
-
-#endif
-
-
-/*-----------------------------------------------------------*/
-
-// Called on every "tick" from main_superloop or FreeRTOS tick hook, depending on DEMO_TYPE.
-void DemoUpdate(int counter)
-{
-	DemoISRUpdate(counter);
-   	DemoStatesUpdate(counter);
-   	DemoUserEventsUpdate(counter);
-
-#if (DEMO_TYPE == DEMO_BAREMETAL)
-   	if (ButtonPressed == 1)
-   	{
-   		ButtonPressed = 0;
-   	    DemoAlert();
-   	}
-#endif
-
-}
-
-
-// Called once during startup, from main.
-void DemoInit(void)
-{
-	DemoAlertInit();
-    DemoISRInit();
-    DemoStatesInit();
-    DemoUserEventsInit();
-
-#if (DEMO_TYPE == DEMO_FREERTOS)
-
-	if( xTaskCreate( DemoTaskFreeRTOS, "DemoTask", 128, NULL, 2, NULL ) != pdPASS )
-	{
-	   configPRINT_STRING(("Failed creating DemoTask."));
-	}
-
-	if (xTaskCreate(DemoAlertTask,  "DemoAlertTask", 1024, NULL, tskIDLE_PRIORITY, &DemoAlertTaskHandle ) != pdPASS)
-	{
-		configPRINT_STRING(("Failed creating ButtonTask."));
-	}
-
-#endif
-}
+static void SystemClock_Config( void );
+static void Console_UART_Init( void );
+static void prvMiscInitialization( void );
 
 /**
  * @brief Application runtime entry point.
@@ -215,29 +66,30 @@ int main( void )
     /* Initialize Percepio TraceRecorder (stores events to ring buffer) */
     xTraceEnable(TRC_START);
 
-    /* Just to set a better name for the main thread...*/
-    REGISTER_TASK(TASK_MAIN, "main-thread");
-
-    /* Used for tracing the HAL_Delay call in the bare-metal superloop. */
-    REGISTER_TASK(TASK_IDLE, "IDLE");
-
-    /* Trace TASK_MAIN as the executing task... */
-    xTraceTaskSwitch((void*)TASK_MAIN, 0);
-
     /* Initialize the Percepio DFM library for creating Alerts. */
     if (xDfmInitializeForLocalUse() == DFM_FAIL)
     {
     	configPRINTF(("Failed to initialize DFM\r\n"));
     }
 
-    DemoInit();
+#if (DEMO_TYPE == DEMO_BAREMETAL)
 
-    // Calls main_superloop or starts FreeRTOS, depending on DEMO_TYPE.
-    RUN_DEMO();
+    extern void main_baremetal( void );
+    main_baremetal();
+
+#elif (DEMO_TYPE == DEMO_FREERTOS)
+
+    extern void main_freertos( void );
+    main_freertos();
+
+#endif
 
     return 0;
 }
+
 /*-----------------------------------------------------------*/
+
+static IotUARTHandle_t xConsoleUart;
 
 void vSTM32L475putc( void * pv,
                      char ch )
@@ -292,10 +144,6 @@ static void prvMiscInitialization( void )
 
     SystemClock_Config();
 
- #if (DEMO_TYPE == DEMO_FREERTOS)
-    prvInitializeHeap();
- #endif
-
     // Enable fault on divide-by-zero and unaligned access
     SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk | SCB_CCR_UNALIGN_TRP_Msk;
 
@@ -338,52 +186,12 @@ void Error_Handler( void )
     }
 }
 
+
 void vMainUARTPrintString( char * pcString )
 {
     iot_uart_write_sync( xConsoleUart, ( uint8_t * ) pcString, strlen( pcString ) );
 }
 
-#if (DEMO_TYPE == DEMO_FREERTOS)
-
-/* The FreeRTOS Heap */
-uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
-
-static void prvInitializeHeap( void )
-{
-    HeapRegion_t xHeapRegions[] =
-    {
-        { ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
-        { NULL,                        0                 }
-    };
-
-    vPortDefineHeapRegions( xHeapRegions );
-}
-
-void vApplicationMallocFailedHook(void)
-{
-	/* Create an Alert and restart here... */
-	DFM_TRAP(DFM_TYPE_MALLOC_FAILED, "Could not allocate heap memory");
-}
-
-void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                     char * pcTaskName )
-{
-	configPRINT_STRING( ( "ERROR: stack overflow\r\n" ) );
-
-	/* Create an Alert and restart here... */
-	DFM_TRAP(DFM_TYPE_STACK_OVERFLOW, "Stack overflow");
-
-	/* Unused Parameters */
-	( void ) xTask;
-	( void ) pcTaskName;
-
-	/* Loop forever - but not reached*/
-	for( ; ; )
-	{
-	}
-}
-
-#endif /* #if (DEMO_TYPE == DEMO_FREERTOS) */
 
 void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef * htim )
 {
@@ -392,60 +200,6 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef * htim )
         HAL_IncTick();
     }
 }
-
-/* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
- * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
- * used by the Idle task. */
-void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
-                                    StackType_t ** ppxIdleTaskStackBuffer,
-                                    uint32_t * pulIdleTaskStackSize )
-{
-/* If the buffers to be provided to the Idle task are declared inside this
- * function then they must be declared static - otherwise they will be allocated on
- * the stack and so not exists after this function exits. */
-    static StaticTask_t xIdleTaskTCB;
-    static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
-
-    /* Pass out a pointer to the StaticTask_t structure in which the Idle
-     * task's state will be stored. */
-    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-
-    /* Pass out the array that will be used as the Idle task's stack. */
-    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-
-    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.
-     * Note that, as the array is necessarily of type StackType_t,
-     * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
-    *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-/*-----------------------------------------------------------*/
-
-/* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
- * implementation of vApplicationGetTimerTaskMemory() to provide the memory that is
- * used by the RTOS daemon/time task. */
-void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
-                                     StackType_t ** ppxTimerTaskStackBuffer,
-                                     uint32_t * pulTimerTaskStackSize )
-{
-/* If the buffers to be provided to the Timer task are declared inside this
- * function then they must be declared static - otherwise they will be allocated on
- * the stack and so not exists after this function exits. */
-    static StaticTask_t xTimerTaskTCB;
-    static StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
-
-    /* Pass out a pointer to the StaticTask_t structure in which the Idle
-     * task's state will be stored. */
-    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-
-    /* Pass out the array that will be used as the Timer task's stack. */
-    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
-
-    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer.
-     * Note that, as the array is necessarily of type StackType_t,
-     * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
-    *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-
 
 
 static void SystemClock_Config( void )
@@ -517,18 +271,17 @@ void DemoSimulateExecutionTime(int n)
 }
 
 
-#if (DEMO_TYPE == DEMO_FREERTOS)
-void DemoTaskFreeRTOS(void* argument)
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
 {
-    for(;;)
+    if (GPIO_Pin == USER_BUTTON_PIN )
     {
-    	DemoUpdate( xTaskGetTickCount() );
-    	vTaskDelay(1);
-    }
-}
+#if (DEMO_TYPE == DEMO_BAREMETAL)
+    	extern void DemoOnButtonPressedBareMetal(void);
+    	DemoOnButtonPressedBareMetal();
+#elif (DEMO_TYPE == DEMO_FREERTOS)
+    	extern void DemoOnButtonPressedFreeRTOS(void);
+    	DemoOnButtonPressedFreeRTOS();
 #endif
-
-void vApplicationTickHook(void)
-{
+    }
 }
 
