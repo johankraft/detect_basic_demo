@@ -34,6 +34,7 @@
 #include "dfm.h"
 #include "dfmCrashCatcher.h"
 
+#include "demo_alert.h"
 #include "demo_states.h"
 #include "demo_user_events.h"
 #include "demo_isr.h"
@@ -63,11 +64,6 @@ IotUARTHandle_t xConsoleUart;
 #define DEMO_TYPE DEMO_BAREMETAL
 
 
-// TODO: For the FreeRTOS version, the current solution of using
-// vApplicationTickHook for running the demo gives a kind of weird trace
-// as there is no task doing the event. Create a task for the superloop.
-
-
 /******************************************************************************
  * REGISTER_TASK
  *
@@ -91,6 +87,8 @@ IotUARTHandle_t xConsoleUart;
 
 #if (DEMO_TYPE == DEMO_BAREMETAL)
 
+volatile int ButtonPressed = 0;
+
 void main_superloop(void)
 {
     int counter = 0;
@@ -108,17 +106,50 @@ void main_superloop(void)
 
 #define RUN_DEMO() main_superloop();
 
+
+// ISR for Button press, wakes up the ButtonTask using a global variable.
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
+{
+    if (GPIO_Pin == USER_BUTTON_PIN )
+    {
+    	ButtonPressed = 1;
+    }
+}
+
+
 #elif (DEMO_TYPE == DEMO_FREERTOS)
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 
+static void DemoAlertTask(void* argument);
 static void prvInitializeHeap( void );
 
 #define RUN_DEMO() vTaskStartScheduler();
 
 void DemoTaskFreeRTOS(void* argument);
+
+TaskHandle_t DemoAlertTaskHandle = NULL;
+
+// ISR for Button press, wakes up the ButtonTask using FreeRTOS task notify call.
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (GPIO_Pin == USER_BUTTON_PIN )
+    {
+    	vTaskNotifyGiveFromISR( DemoAlertTaskHandle, &xHigherPriorityTaskWoken );
+    }
+}
+
+void DemoAlertTask(void* argument)
+{
+	for(;;)
+    {
+    	ulTaskNotifyTake( pdTRUE, portMAX_DELAY );  /* Block indefinitely. */
+    	DemoAlert();
+    }
+}
 
 #elif
 
@@ -129,153 +160,28 @@ void DemoTaskFreeRTOS(void* argument);
 
 /*-----------------------------------------------------------*/
 
-void ButtonTask(void* argument);
-
-char* stackoverflowpadding = NULL;
-
-typedef struct task_arg {
-    uint32_t type;
-    const char* message;
-} task_arg_t;
-
-
-/*** Test case: Hard fault exception  ****************************************/
-
-static int MakeFaultExceptionByIllegalRead(void)
-{
-   int r;
-   volatile unsigned int* p;
-
-   // Creating an invalid pointer)
-   p = (unsigned int*)0x00100000;
-   r = *p;
-
-   return r;
-}
-
-// Just to make the displayed call stack a bit more interesting...
-int dosomething(int n)
-{
-	if (n != -42)
-	{
-		return MakeFaultExceptionByIllegalRead();
-	}
-	return 0;
-}
-
-
-/*** Test case: Buffer overflow, causes  __stack_chk_fail to be called. ******/
-
-#define MAX_MESSAGE_SIZE 12
-
-void getNetworkMessage(char* data)
-{
-	sprintf(data, "Incoming data");
-}
-
-void processNetworkMessage(char* data)
-{
-	configPRINT_STRING("  Simulated network message: \"");
-	configPRINT_STRING(data);
-	configPRINT_STRING("\"\n");
-}
-
-void prvCheckForNetworkMessages(void)
-{
-	char message[MAX_MESSAGE_SIZE];
-	getNetworkMessage(message);
-	processNetworkMessage(message);
-}
-
-void testBufferOverrun(void)
-{
-	prvCheckForNetworkMessages();
-}
-
-/*** Test case: Failed assert statement triggers an Alert ********************/
-
-void testAssertFailed(char* str)
-{
-	configASSERT( str != NULL );
-
-	configPRINTF(("Input: %s", str));
-}
-
-/*****************************************************************************/
-
-#if (DEMO_TYPE == DEMO_FREERTOS)
-
-TaskHandle_t xBhjHandle = NULL;
-
-char* ptr = NULL;
-
-void ButtonTask(void* argument)
-{
-	configPRINT_STRING( "\n\nDemo ready - Press blue button to trigger an error that is captured by DevAlert.\n\n" );
-    for(;;)
-    {
-    	ulTaskNotifyTake( pdTRUE, portMAX_DELAY );  /* Block indefinitely. */
-
-    	/* Pick a random test case... TRC_HWTC_COUNT gives the current clock cycle count. */
-
-    	switch(TRC_HWTC_COUNT % 4)
-        {
-        		case 0:
-
-        			configPRINTF(( "Test case: Assert failed\n"));
-
-        			vTaskDelay(1000);
-
-        			testAssertFailed(ptr);
-
-        			break;
-
-        		case 1:
-
-        			configPRINTF(( "Test case: Malloc failed\n"));
-
-        			vTaskDelay(1000);
-
-        			pvPortMalloc(1000000); // This much heap memory isn't available, should fail
-
-        			break;
-
-        		case 2:
-
-        			configPRINTF(( "Test case: Hardware fault exception\n"));
-
-        			vTaskDelay(1000);
-
-        			dosomething(3);
-
-        			break;
-
-        		case 3:
-
-        			configPRINTF(( "Test case: Buffer overrun\n"));
-
-        			vTaskDelay(1000);
-
-        			testBufferOverrun();
-        			break;
-
-        }
-    }
-}
-#endif
-
 // Called on every "tick" from main_superloop or FreeRTOS tick hook, depending on DEMO_TYPE.
 void DemoUpdate(int counter)
 {
 	DemoISRUpdate(counter);
    	DemoStatesUpdate(counter);
    	DemoUserEventsUpdate(counter);
+
+#if (DEMO_TYPE == DEMO_BAREMETAL)
+   	if (ButtonPressed == 1)
+   	{
+   		ButtonPressed = 0;
+   	    DemoAlert();
+   	}
+#endif
+
 }
 
 
 // Called once during startup, from main.
 void DemoInit(void)
 {
+	DemoAlertInit();
     DemoISRInit();
     DemoStatesInit();
     DemoUserEventsInit();
@@ -287,8 +193,12 @@ void DemoInit(void)
 	   configPRINT_STRING(("Failed creating DemoTask."));
 	}
 
-#endif
+	if (xTaskCreate(DemoAlertTask,  "DemoAlertTask", 1024, NULL, tskIDLE_PRIORITY, &DemoAlertTaskHandle ) != pdPASS)
+	{
+		configPRINT_STRING(("Failed creating ButtonTask."));
+	}
 
+#endif
 }
 
 /**
@@ -326,30 +236,6 @@ int main( void )
     return 0;
 }
 /*-----------------------------------------------------------*/
-
-// TODO: Generalize for bare metal
-void vApplicationDaemonTaskStartupHook( void )
-{
-    configPRINTF( ( "\n\n\n\n--- Percepio Detect Basic Demo ---\n" ) );
-
-    // Can be read from elf file by "arm-none-eabi-readelf -n aws_demos.elf"
-    configPRINTF(("Firmware Revision: %s\n", DFM_CFG_FIRMWARE_VERSION));
-
-
-#if (DEMO_TYPE == DEMO_FREERTOS)
-    /* Basic demo initialization for serial port upload */
-	xTaskCreate(ButtonTask,       /* Function that implements the task. */
-			   "DemoTask1",          /* Text name for the task. */
-			   1024,           /* Stack size in words, not bytes. */
-			   NULL,    		/* Parameter passed into the task. */
-			   tskIDLE_PRIORITY,/* Priority at which the task is created. */
-			   &xBhjHandle );      /* Used to pass out the created task's handle. */
-
-#endif
-
-	BSP_LED_On( LED_GREEN );
-
-}
 
 void vSTM32L475putc( void * pv,
                      char ch )
@@ -490,23 +376,6 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 	for( ; ; )
 	{
 	}
-}
-
-
-/*-----------------------------------------------------------*/
-
-void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
-{
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    switch( GPIO_Pin )
-    {
-        case ( USER_BUTTON_PIN ):
-            vTaskNotifyGiveFromISR( xBhjHandle, &xHigherPriorityTaskWoken );
-            break;
-
-        default:
-            break;
-    }
 }
 
 #endif /* #if (DEMO_TYPE == DEMO_FREERTOS) */
