@@ -92,6 +92,12 @@ volatile int ButtonPressed = 0;
 void main_superloop(void)
 {
     int counter = 0;
+
+    // Set BasePri 0
+    // Enable all interrupts
+    __set_BASEPRI(0);
+    __enable_irq();
+
     while (1)
     {
     	DemoUpdate(counter);
@@ -150,10 +156,6 @@ void DemoAlertTask(void* argument)
     	DemoAlert();
     }
 }
-
-#elif
-
-#error "Invalid option for DEMO_TYPE."
 
 #endif
 
@@ -290,12 +292,15 @@ static void prvMiscInitialization( void )
 
     SystemClock_Config();
 
-#if (DEMO_TYPE == DEMO_FREERTOS)
+ #if (DEMO_TYPE == DEMO_FREERTOS)
     prvInitializeHeap();
-#endif
+ #endif
 
-	// Enable usage fault and bus fault exceptions.
-	SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk;
+    // Enable fault on divide-by-zero and unaligned access
+    SCB->CCR |= SCB_CCR_DIV_0_TRP_Msk | SCB_CCR_UNALIGN_TRP_Msk;
+
+    // enable UsageFault, BusFault and MPU Fault
+    SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk |  SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;
 
     BSP_LED_Init( LED_GREEN );
     BSP_PB_Init( BUTTON_USER, BUTTON_MODE_EXTI );

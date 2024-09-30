@@ -112,7 +112,8 @@ void DemoAlert(void)
 
 void DemoAlertInit(void)
 {
-    configPRINTF(("\nFirmware Revision: %s\n", DFM_CFG_FIRMWARE_VERSION));
-
-	configPRINT_STRING( "\n\nAlert Demo - Press blue button to trigger an error that is captured by DevAlert.\n\n" );
+	configPRINT_STRING( "\n--- Percepio Detect Demo ---\n");
+	configPRINTF(("DFM_CFG_FIRMWARE_VERSION: %s\n\n", DFM_CFG_FIRMWARE_VERSION));
+	configPRINT_STRING("Press the blue button to trigger an error and output an Alert.\n");
+	configPRINT_STRING("Log this output to a log file and pass it to Percepio Receiver.\n");
 }

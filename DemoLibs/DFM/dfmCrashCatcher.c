@@ -200,6 +200,28 @@ void CrashCatcher_DumpMemory(const void* pvMemory, CrashCatcherElementSizes elem
 {
 	int32_t current_usage = (uint32_t)ucBufferPos - (uint32_t)ucDataBuffer;
 
+	// If inside stack RAM memory area...
+	if ( ((unsigned int)pvMemory >= DFM_CFG_ADDR_CHECK_BEGIN) && ((unsigned int)pvMemory < DFM_CFG_ADDR_CHECK_NEXT))
+	{
+		// This is always 1 when reading the stack. An assumption that simplifies the code below.
+		if (elementSize == 1)
+		{
+			// Check that not reading outside the valid memory range.
+			if ( (unsigned int) pvMemory + elementCount >= DFM_CFG_ADDR_CHECK_NEXT)
+			{
+				elementCount = DFM_CFG_ADDR_CHECK_NEXT - (unsigned int) pvMemory;
+				//printf("\nDFM: Memory dump truncated from %d to %d byte at end of range.\n\n", elementCount, adjustedSize);
+				//elementCount = adjustedSize;
+			}
+		}
+	}
+
+	if ( current_usage + (elementSize*elementCount) >= CRASH_DUMP_BUFFER_SIZE)
+	{
+		DFM_ERROR_PRINT("\nDFM: Error, ucDataBuffer not large enough!\n\n");
+		return;
+	}
+
 	/* This function is called when CrashCatcher detects an internal stack overflow (it has a separate stack) */
 	if (g_crashCatcherStack[0] != CRASH_CATCHER_STACK_SENTINEL)
 	{
@@ -232,35 +254,15 @@ void CrashCatcher_DumpMemory(const void* pvMemory, CrashCatcherElementSizes elem
 
 		case CRASH_CATCHER_BYTE:
 
-			if ( current_usage + elementCount >= CRASH_DUMP_BUFFER_SIZE)
-			{
-				DFM_ERROR_PRINT("\nDFM: Error, ucDataBuffer not large enough!\n\n");
-				return;
-			}
-
 			memcpy((void*)ucBufferPos, pvMemory, elementCount);
 			ucBufferPos += elementCount;
 			break;
 
 		case CRASH_CATCHER_HALFWORD:
-
-			if ( current_usage + elementCount*2 >= CRASH_DUMP_BUFFER_SIZE)
-			{
-				DFM_ERROR_PRINT("\nDFM: Error, ucDataBuffer not large enough!\n\n");
-				return;
-			}
 			dumpHalfWords(pvMemory, elementCount);
-
 			break;
 
 		case CRASH_CATCHER_WORD:
-
-			if ( current_usage + elementCount*4 >= CRASH_DUMP_BUFFER_SIZE)
-			{
-				DFM_ERROR_PRINT("\nDFM: Error, ucDataBuffer not large enough!\n\n");
-				return;
-			}
-
 			dumpWords(pvMemory, elementCount);
 
 			break;
@@ -298,29 +300,25 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void)
 	if (xAlertHandle != 0)
 	{
 		uint32_t size = (uint32_t)ucBufferPos - (uint32_t)ucDataBuffer;
-		if (xDfmAlertAddPayload(xAlertHandle, ucDataBuffer, size, CRASH_DUMP_NAME) == DFM_SUCCESS)
+		if (xDfmAlertAddPayload(xAlertHandle, ucDataBuffer, size, CRASH_DUMP_NAME) != DFM_SUCCESS)
 		{
-			DFM_DEBUG_PRINT("  DFM: Crash dump stored.\n");
-		}
-		else
-		{
-			DFM_ERROR_PRINT("  DFM: Failed storing crash dump.\n");
+			DFM_ERROR_PRINT("DFM: Error, xDfmAlertAddPayload failed.\n");
 		}
 
 #ifdef DFM_CLOUD_PORT_ALWAYS_ATTEMPT_TRANSFER
 		/* The cloud port has indicated it is always OK to attempt to transfer */
-		if (xDfmAlertEnd(xAlertHandle) == DFM_SUCCESS)
+		if (xDfmAlertEnd(xAlertHandle) != DFM_SUCCESS)
+		{
+			DFM_DEBUG_PRINT("DFM: xDfmAlertEnd failed.\n");
+		}
+
 #else
 		/* Cloud port transfer cannot be trusted, so we only attempt to store it */
-		if (xDfmAlertEndOffline(xAlertHandle) == DFM_SUCCESS)
+		if (xDfmAlertEndOffline(xAlertHandle) != DFM_SUCCESS)
+		{
+			DFM_DEBUG_PRINT("DFM: xDfmAlertEndOffline failed.\n");
+		}
 #endif
-		{
-			DFM_DEBUG_PRINT("  DFM: Alert stored OK.\n");
-		}
-		else
-		{
-			DFM_ERROR_PRINT("  DFM: Failed storing alert.\n");
-		}
 
 	}
 

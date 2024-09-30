@@ -37,13 +37,6 @@
  */
 #define CRASH_FINALIZE() DFM_DEBUG_PRINT("DFM: Restarting...\n\n\n"); CRASH_STRATEGY_RESET()
 
-/* CRASH_STACK_CAPTURE_SIZE
- * The number of bytes from the current stack to capture, relative to the stack pointer.
- * The capture is from SP to SP + CRASH_PSP_CAPTURE_SIZE, so only the most recent stack
- * frames are included. Since relative to the current stack pointer, you don't need to
- * specify a stack memory range manually.
- * */
-#include <dfmConfig.h> // For accessing the Demo settings
 #define CRASH_STACK_CAPTURE_SIZE DFM_CFG_STACKDUMP_SIZE
 
 /* Additional memory ranges to include in the crash dump (e.g. heap memory) */
