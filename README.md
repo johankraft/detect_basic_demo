@@ -1,1 +1,0 @@
-# detect_basic_demo

@@ -41,7 +41,7 @@ extern "C" {
  * Set DFM_CFG_ADDR_CHECK_NEXT to the first invalid address after the stack(s).
  * In other words, the first byte that must not be read by the stack dump.
  * For example, a reserved memory range following the SRAM.
- *****************************************************************************/
+ */
 #define DFM_CFG_ADDR_CHECK_NEXT 0x20018000
 
 /**

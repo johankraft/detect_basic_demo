@@ -60,10 +60,6 @@ int main_freertos( void )
 {
 	prvInitializeHeap();
 
-    /* NEEDED???? Just to set a better name for the main thread...*/
-    //REGISTER_TASK(TASK_MAIN, "main-thread");
-    //xTraceTaskSwitch((void*)TASK_MAIN, 0);
-
     DemoInit();
 
     // Starts FreeRTOS
@@ -116,7 +112,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,
 	configPRINT_STRING( ( "ERROR: stack overflow\r\n" ) );
 
 	/* Create an Alert and restart here... */
-	DFM_TRAP(DFM_TYPE_STACK_OVERFLOW, "Stack overflow");
+	// DFM_TRAP(DFM_TYPE_STACK_OVERFLOW, "Stack overflow");
 
 	/* Unused Parameters */
 	( void ) xTask;

@@ -22,8 +22,6 @@
 #define DFM_CODES_H
 /* Alert Types */
 /* The following Alert Types are published and will not change. */
-#define DFM_TYPE_STACK_CHK_FAILED (9) /* Stack corrupted */
-#define DFM_TYPE_STACK_OVERFLOW (8) /* Stack overflow detected */
 #define DFM_TYPE_HEARTBEAT (7) /* Heartbeat failure */
 #define DFM_TYPE_BAD_MESSAGE (6) /* Invalid/bad message received */
 #define DFM_TYPE_OVERLOAD (5) /* CPU Overload */
@@ -35,7 +33,6 @@
 
 /* Symptoms */
 /* The following Symptoms are published and will not change. */
-#define DFM_SYMPTOM_HARDFAULT_REASON (8)
 #define DFM_SYMPTOM_ARM_SCB_FCSR (7) /* CFSR (misspelled) */
 #define DFM_SYMPTOM_STACKPTR (6) /* Stack Pointer */
 #define DFM_SYMPTOM_PC (5) /* PC */

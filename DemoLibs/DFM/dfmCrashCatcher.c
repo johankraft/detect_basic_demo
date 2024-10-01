@@ -74,15 +74,25 @@ static uint32_t prvCalculateChecksum(char *ptr, size_t maxlen)
 const CrashCatcherMemoryRegion* CrashCatcher_GetMemoryRegions(void)
 {
 	static CrashCatcherMemoryRegion regions[] = {
-			{0xFFFFFFFF, 0xFFFFFFFF, CRASH_CATCHER_BYTE},
-			{CRASH_MEM_REGION1_START, CRASH_MEM_REGION1_START + CRASH_MEM_REGION1_SIZE, CRASH_CATCHER_BYTE},
-			{CRASH_MEM_REGION2_START, CRASH_MEM_REGION2_START + CRASH_MEM_REGION2_SIZE, CRASH_CATCHER_BYTE},
-			{CRASH_MEM_REGION3_START, CRASH_MEM_REGION3_START + CRASH_MEM_REGION3_SIZE, CRASH_CATCHER_BYTE}
+		{0xFFFFFFFF, 0xFFFFFFFF, CRASH_CATCHER_BYTE},
+		{CRASH_MEM_REGION1_START, CRASH_MEM_REGION1_START + CRASH_MEM_REGION1_SIZE, CRASH_CATCHER_BYTE},
+		{CRASH_MEM_REGION2_START, CRASH_MEM_REGION2_START + CRASH_MEM_REGION2_SIZE, CRASH_CATCHER_BYTE},
+		{CRASH_MEM_REGION3_START, CRASH_MEM_REGION3_START + CRASH_MEM_REGION3_SIZE, CRASH_CATCHER_BYTE}
 	};
 
 	/* Region 0 is reserved, always relative to the current stack pointer */
 	regions[0].startAddress = stackPointer;
 	regions[0].endAddress = stackPointer + CRASH_STACK_CAPTURE_SIZE;
+
+	// If inside the stack memory area, we verify that we don't overrun the endAddress...
+	if ( (regions[0].startAddress >= DFM_CFG_ADDR_CHECK_BEGIN) && (regions[0].startAddress < DFM_CFG_ADDR_CHECK_NEXT))
+	{
+		// Check that not reading outside the valid memory range.
+		if ( regions[0].endAddress >= DFM_CFG_ADDR_CHECK_NEXT)
+		{
+			regions[0].endAddress = DFM_CFG_ADDR_CHECK_NEXT - 4;
+		}
+	}
 
 	return regions;
 }
@@ -200,22 +210,6 @@ void CrashCatcher_DumpMemory(const void* pvMemory, CrashCatcherElementSizes elem
 {
 	int32_t current_usage = (uint32_t)ucBufferPos - (uint32_t)ucDataBuffer;
 
-	// If inside stack RAM memory area...
-	if ( ((unsigned int)pvMemory >= DFM_CFG_ADDR_CHECK_BEGIN) && ((unsigned int)pvMemory < DFM_CFG_ADDR_CHECK_NEXT))
-	{
-		// This is always 1 when reading the stack. An assumption that simplifies the code below.
-		if (elementSize == 1)
-		{
-			// Check that not reading outside the valid memory range.
-			if ( (unsigned int) pvMemory + elementCount >= DFM_CFG_ADDR_CHECK_NEXT)
-			{
-				elementCount = DFM_CFG_ADDR_CHECK_NEXT - (unsigned int) pvMemory;
-				//printf("\nDFM: Memory dump truncated from %d to %d byte at end of range.\n\n", elementCount, adjustedSize);
-				//elementCount = adjustedSize;
-			}
-		}
-	}
-
 	if ( current_usage + (elementSize*elementCount) >= CRASH_DUMP_BUFFER_SIZE)
 	{
 		DFM_ERROR_PRINT("\nDFM: Error, ucDataBuffer not large enough!\n\n");
@@ -326,13 +320,12 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void)
 	return CRASH_CATCHER_EXIT;
 }
 
-
 /* Called by gcc stack-checking code when using the gcc option -fstack-protector-strong */
 void __stack_chk_fail(void)
 {
 	// If this happens, the stack has been corrupted by the previous function in the call stack.
 	// Note that the exact location of the stack corruption is not known, since detected when exiting the function.
-	DFM_TRAP(DFM_TYPE_STACK_CHK_FAILED, "Stack corruption detected");
+	DFM_TRAP(DFM_TYPE_ASSERT_FAILED, "Stack corruption detected");
 }
 
 #endif
