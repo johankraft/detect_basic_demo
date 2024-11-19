@@ -1830,6 +1830,25 @@ traceResult xTraceSetBuffer(TraceRecorderData_t *pxBuffer);
  */
 traceResult xTraceGetEventBuffer(void** ppvBuffer, TraceUnsignedBaseType_t * puiSize);
 
+
+/**
+ * @brief Pauses the tracing, useful when reading the trace buffer (instead of xTraceDisable()).
+ *
+ * @retval TRC_SUCCESS Success
+ */
+
+traceResult xTracePause(void);
+
+/**
+ * @brief Resumes the tracing after being paused by xTracePause().
+ *
+ * @retval TRC_SUCCESS Success
+ */
+
+traceResult xTraceResume(void);
+
+
+
 #else /* when TRC_USE_TRACEALYZER_RECORDER == 0 */
 
 #define xTraceInitialize() (TRC_SUCCESS)

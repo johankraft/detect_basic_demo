@@ -410,6 +410,29 @@ traceResult xTraceEnable(uint32_t uiStartOption)
 	return TRC_SUCCESS;
 }
 
+static int prvTraceRecorderIsPaused = 0;
+
+traceResult xTracePause(void)
+{
+	if (xTraceIsRecorderEnabled()) // Only if initialized and started...
+	{
+		pxTraceRecorderData->uiRecorderEnabled = 0;
+		prvTraceRecorderIsPaused = 1;
+	}
+	return TRC_SUCCESS;
+}
+
+
+traceResult xTraceResume(void)
+{
+	if (prvTraceRecorderIsPaused == 1)
+	{
+		pxTraceRecorderData->uiRecorderEnabled = 1;
+		prvTraceRecorderIsPaused = 0;
+	}
+	return TRC_SUCCESS;
+}
+
 traceResult xTraceDisable(void)
 {
 	prvSetRecorderDisabled();

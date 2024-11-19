@@ -185,24 +185,14 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 #if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
 static void prvAddTracePayload(void)
 {
-	char* szName;
 	void* pvBuffer = (void*)0;
 	uint32_t ulBufferSize = 0;
-	if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
-	{
-		szName = "dfm_trace.psfs";
-	}
-	else if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_SNAPSHOT)
-	{
-		szName = "dfm_trace.trc";
-	}
-
 	if (xTraceIsRecorderEnabled() == 1)
 	{
 		xTraceDisable();
 	}
 	xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
-	xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, szName);
+	xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
 }
 #endif
 
