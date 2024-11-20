@@ -49,15 +49,17 @@ static void DemoInit(void);
  * Changes:
  * - Added initial Stopwatch API. See serial output from alerts.
  * - Added xTracePause() and xTraceResume() to avoid reseting the trace.
+ * - Optimized stopwatch API. Overhead now just 31-108 clock cycles on Arm.
+ * - Solved hard fault issue in DFM caused by GCC bug on -O3.
+ * - Demo app now remembers last test case, so it cycles through the alerts. Didn't require linker file changes (attribute noinit). Can be used to implement retained memory for any GCC target.
  *
  * TODO:
- * - Load alerts into Detect server.
+ * - Test loading alerts into Detect server.
  * - Move to a separate dfm file (clean up).
  * - Unit tests for Stopwatch API (also verify overflows).
  * - Improve the demo application.
  * - Allow for using DFM_TRAP without restarting.
  */
-
 
 extern char cDfmPrintBuffer[128];
 
@@ -73,132 +75,123 @@ typedef struct {
 dfmStopwatch_t stopwatches[MAX_STOPWATCHES];
 int32_t stopwatch_count = 0;
 
-DfmResult_t xDfmStopwatchCreate(char* name, int expected_max, int* stopwatch_id);
-DfmResult_t xDfmStopwatchBegin(int stopwatch_id);
-DfmResult_t xDfmStopwatchEnd(int stopwatch_id);
+dfmStopwatch_t* xDfmStopwatchCreate(char* name, uint32_t expected_max);
+void vDfmStopwatchBegin(dfmStopwatch_t* sw);
+void vDfmStopwatchEnd(dfmStopwatch_t* sw);
 
-DfmResult_t xDfmStopwatchCreate(char* name, int expected_max, int* stopwatch_id)
+dfmStopwatch_t* xDfmStopwatchCreate(char* name, uint32_t expected_max)
 {
 	TRACE_ALLOC_CRITICAL_SECTION();
-	DfmResult_t result = DFM_FAIL;
-	*stopwatch_id = -1;
+	dfmStopwatch_t* sw = NULL;
 
 	TRACE_ENTER_CRITICAL_SECTION();
 
 	if (stopwatch_count < MAX_STOPWATCHES)
 	{
-		*stopwatch_id = stopwatch_count;
+		sw = &stopwatches[stopwatch_count];
 
-		stopwatches[stopwatch_count].expected_duration = expected_max;
-		stopwatches[stopwatch_count].name = name;
-		stopwatches[stopwatch_count].high_watermark = 0;
-		stopwatches[stopwatch_count].start_time = 0;
+		sw->expected_duration = expected_max;
+		sw->name = name;
+		sw->high_watermark = 0;
+		sw->start_time = 0;
 
 		stopwatch_count++;
-
-		result = DFM_SUCCESS;
 	}
 	TRACE_EXIT_CRITICAL_SECTION();
 
-	return result;
+	return sw;
 }
 
-DfmResult_t xDfmStopwatchBegin(int stopwatch_id)
+void vDfmStopwatchBegin(dfmStopwatch_t* sw)
 {
-	if ((stopwatch_id >= 0) && (stopwatch_id < MAX_STOPWATCHES))
+	if (sw != NULL)
 	{
-		stopwatches[stopwatch_id].start_time = TRC_HWTC_COUNT;
-		return DFM_SUCCESS;
-	}
-	else
-	{
-		return DFM_FAIL;
+		sw->start_time = TRC_HWTC_COUNT;
 	}
 }
 
 extern void prvAddTracePayload(void);
 
-DfmResult_t xDfmStopwatchEnd(int stopwatch_id)
+void vDfmStopwatchEnd(dfmStopwatch_t* sw)
 {
-	static DfmAlertHandle_t xAlertHandle;
-	DfmResult_t result = DFM_FAIL;
+	uint32_t end_time = TRC_HWTC_COUNT;
 
-	if ((stopwatch_id >= 0) && (stopwatch_id < MAX_STOPWATCHES))
+	if (sw != NULL)
 	{
-		uint32_t end_time = TRC_HWTC_COUNT;
-
 		/* Overflow in HWTC_COUNT is OK. Say that start_time is 0xFFFFFFFF
 		 * and end_time is 1, then we get (1 - 0xFFFFFFFF) = 2.
 		 * This since 0xFFFFFFFF equals -1 (signed) and 1 - (-1)) = 2 */
-		uint32_t duration = end_time - stopwatches[stopwatch_id].start_time;
+		uint32_t duration = end_time - sw->start_time;
 
 		/* Alert if new highest value is found, assuming it is above expected_duration (provides a lower threshold) */
-		if ( (duration > stopwatches[stopwatch_id].expected_duration) && (duration > stopwatches[stopwatch_id].high_watermark) )
+		if (duration > sw->high_watermark)
 		{
-			stopwatches[stopwatch_id].high_watermark = duration;
+			sw->high_watermark = duration;
 
-			snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch %s, new high: %u", stopwatches[stopwatch_id].name, (unsigned int)stopwatches[stopwatch_id].high_watermark);
-			DFM_DEBUG_PRINT(cDfmPrintBuffer);
-
-			if (xDfmAlertBegin(DFM_TYPE_OVERLOAD, cDfmPrintBuffer, &xAlertHandle) == DFM_SUCCESS)
+			if (duration > sw->expected_duration)
 			{
-				void* pvBuffer = (void*)0;
-				uint32_t ulBufferSize = 0;
+				static DfmAlertHandle_t xAlertHandle;
 
-				// xDfmAlertAddSymptom(xAlertHandle,
+				snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch %s, new high: %u", sw->name, (unsigned int)sw->high_watermark);
+				DFM_DEBUG_PRINT(cDfmPrintBuffer);
 
-				static TraceStringHandle_t TzUserEventChannel = NULL;
-
-				if (TzUserEventChannel == 0)
+				if (xDfmAlertBegin(DFM_TYPE_OVERLOAD, cDfmPrintBuffer, &xAlertHandle) == DFM_SUCCESS)
 				{
-					xTraceStringRegister("ALERT", &TzUserEventChannel);
-				}
+					void* pvBuffer = (void*)0;
+					uint32_t ulBufferSize = 0;
 
-				xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
+					// xDfmAlertAddSymptom(xAlertHandle,
 
-				/* Pausing the tracing while outputting the data. Note that xDfmAlertAddPayload doesn't copy the trace data, only the pointer.
-				 * So we should not allow new events to be written to the trace buffer before xDfmAlertEnd (where it is stored) */
-				xTracePause();
+					static TraceStringHandle_t TzUserEventChannel = NULL;
 
-				xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
-				xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
+					if (TzUserEventChannel == 0)
+					{
+						xTraceStringRegister("ALERT", &TzUserEventChannel);
+					}
 
-				/* Assumes "cloud port" is a UART or similar, that is always available. */
-				if (xDfmAlertEnd(xAlertHandle) == DFM_SUCCESS)
-				{
-					DFM_DEBUG_PRINT("DFM: xDfmAlertEnd OK.\n");
-					result = DFM_SUCCESS;
-				}
-				else
-				{
-					DFM_DEBUG_PRINT("DFM: xDfmAlertEnd failed.\n");
-					result = DFM_FAIL;
+					xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
+
+					/* Pausing the tracing while outputting the data. Note that xDfmAlertAddPayload doesn't copy the trace data, only the pointer.
+					 * So we should not allow new events to be written to the trace buffer before xDfmAlertEnd (where it is stored) */
+					xTracePause();
+
+					xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
+					xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
+
+					/* Assumes "cloud port" is a UART or similar, that is always available. */
+					if (xDfmAlertEnd(xAlertHandle) != DFM_SUCCESS)
+					{
+						DFM_DEBUG_PRINT("DFM: xDfmAlertEnd failed.\n");
+					}
+					xTraceResume();
 				}
 			}
 		}
 	}
-
-	xTraceResume();
-
-	return result;
 }
 
-//#define TEST_STOPWATCH
 
-#ifdef TEST_STOPWATCH
+//#define INCLUDE_STOPWATCH
+//#define STOPWATCH_OVERHEAD_MEASUREMENT
+
+#ifdef INCLUDE_STOPWATCH
 
 void main_superloop(void)
 {
     int counter = 0;
+    dfmStopwatch_t* my_stopwatch = xDfmStopwatchCreate("MyStopwatch1", 10);
+
+    if (my_stopwatch == NULL)
+    {
+    	printf("ERROR, my_stopwatch == NULL\n");
+    	return;
+    }
 
     while (1)
     {
-    	int my_stopwatch;
-    	xDfmStopwatchCreate("MyStopwatch1", 10000, &my_stopwatch);
-
-    	xDfmStopwatchBegin(my_stopwatch);
+    	vDfmStopwatchBegin(my_stopwatch);
     	DemoUpdate(counter);
-    	xDfmStopwatchEnd(my_stopwatch);
+    	vDfmStopwatchEnd(my_stopwatch);
 
     	counter++;
 
@@ -209,7 +202,94 @@ void main_superloop(void)
     }
 }
 
+
+#elif defined(STOPWATCH_OVERHEAD_MEASUREMENT)
+
+/******************************************************************************
+ * Profiling results on 80 MHz Arm Cortex-M4 (STM32L475)
+ *
+ * Clock cycles needed for one measurement (xDfmStopwatchBegin() +
+ * xDfmStopwatchEnd()) in the normal case (no alert or new high watermark).
+ * - No Optimizations (-O0): 108 cycles
+ * - Basic Optimizations (-O1): 65 cycles
+ * - Full Optimizations (-O3): 31 cycles
+ *
+ * This means, with 1000 measurements per second on this 80 MHz device, the
+ * execution time overhead would be 0,04%-0.14%.
+ *****************************************************************************/
+
+void main_superloop(void)
+{
+    int counter = 0;
+    dfmStopwatch_t* my_stopwatch;
+
+    uint32_t starttime1;
+    uint32_t endtime1;
+    uint32_t max1 = 0;
+    uint32_t starttime2;
+    uint32_t endtime2;
+    uint32_t max2 = 0;
+    uint32_t dur;
+
+    my_stopwatch = xDfmStopwatchCreate("MyStopwatch1", 10);
+    if (my_stopwatch == NULL)
+    {
+    	printf("ERROR, my_stopwatch == NULL\n");
+    	return;
+    }
+
+    while (1)
+    {
+
+
+    	starttime1 = TRC_HWTC_COUNT;
+    	vDfmStopwatchBegin(my_stopwatch);
+    	endtime1 = TRC_HWTC_COUNT;
+
+    	DemoUpdate(counter);
+
+    	starttime2 = TRC_HWTC_COUNT;
+    	vDfmStopwatchEnd(my_stopwatch);
+    	endtime2 = TRC_HWTC_COUNT;
+
+    	dur = endtime1 - starttime1;
+    	printf("Begin: %u", (unsigned int)dur);
+
+    	if (dur > max1)
+    	{
+    		printf(" - new high watermark.\n");
+    		max1 = dur;
+    	}
+    	else
+    	{
+    		printf("\n");
+    	}
+
+    	dur = endtime2 - starttime2;
+    	printf("End: %u", (unsigned int)dur);
+    	if (dur > max2)
+    	{
+    		printf(" - new high watermark.\n");
+    		max2 = dur;
+    	}
+    	else
+ 	    {
+    		printf("\n");
+    	}
+
+    	counter++;
+
+        xTraceTaskSwitch( (void*)TASK_IDLE, 0);
+    	HAL_Delay(1);
+    	xTraceTaskSwitch( (void*)TASK_MAIN, 0);
+
+    }
+}
+
+
 #else
+
+// No stopwatch
 void main_superloop(void)
 {
     int counter = 0;

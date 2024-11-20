@@ -24,6 +24,10 @@
 /* Percepio includes */
 #include "trcRecorder.h"
 
+/* Intentionally not initialized, value is kept between warm restarts. */
+static volatile __attribute__((section (".noinit"))) unsigned int last_test_case;
+static volatile __attribute__((section (".noinit"))) unsigned int last_test_case_control;
+
 /*** Test case: Hard fault exception  ****************************************/
 
 static int MakeFaultExceptionByIllegalRead(void)
@@ -90,7 +94,24 @@ void testAssertFailed(char* str)
 
 void DemoAlert(void)
 {
-	switch(TRC_HWTC_COUNT % 3)
+	int test_case = 0;
+
+	if ((last_test_case < 3) && (last_test_case_control == last_test_case * 16))
+	{
+		// After warm restart, we remember the previous case.
+		test_case = (last_test_case+1)%3;
+		last_test_case = test_case;
+		last_test_case_control = last_test_case * 16;
+	}
+	else
+	{
+		// First button press after cold start, reset variables.
+		test_case = 0;
+		last_test_case = 0;
+		last_test_case_control = 0;
+	}
+
+	switch(test_case % 3)
 	{
 		case 0:
 			configPRINTF(( "Test case: Assert failed\n"));
@@ -116,4 +137,13 @@ void DemoAlertInit(void)
 	configPRINTF(("DFM_CFG_FIRMWARE_VERSION: %s\n\n", DFM_CFG_FIRMWARE_VERSION));
 	configPRINT_STRING("Press the blue button to trigger an error and output an Alert.\n");
 	configPRINT_STRING("Log this output to a log file and pass it to Percepio Receiver.\n");
+
+	if (last_test_case < 3)
+	{
+		if (last_test_case_control == last_test_case * 16)
+		{
+			configPRINTF(("Last test case: %d\n", last_test_case));
+		}
+	}
+
 }

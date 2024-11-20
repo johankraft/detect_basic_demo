@@ -577,6 +577,15 @@ static DfmResult_t prvDfmAlertInitialize(DfmAlertHandle_t xAlertHandle, uint8_t 
 	uint32_t i;
 	DfmAlert_t* pxAlert = (DfmAlert_t*)xAlertHandle;
 
+	/* The local variable firmware_version_size is a workaround for a bug in GCC version 12.3.1.
+	 * This caused a hard fault when using full optimization (-O3) in STM32CubeIDE version 1.15 and 1.16.
+	 * The GCC bug is that it applies an optimization on the assignment of ucFirmwareVersionSize and
+	 * adjacent fields, trying to set four byte fields with a single 32-bit store instruction.
+	 * But the target address is not 32-bit aligned, causing an illegal unaligned store operation.
+	 * By using a volatile local variable we prevent that optimization.
+	 */
+	volatile uint32_t firmware_version_size = (volatile uint8_t)(DFM_FIRMWARE_VERSION_MAX_LEN);
+
 	if (pxDfmAlertData == (void*)0)
 	{
 		DFM_ERROR_PRINT("prvDfmAlertInitialize Error - pxDfmAlertData is NULL\n");
@@ -603,7 +612,7 @@ static DfmResult_t prvDfmAlertInitialize(DfmAlertHandle_t xAlertHandle, uint8_t 
 	pxDfmAlertData->xAlert.usEndianness = 0x0FF0;
 	pxDfmAlertData->xAlert.ucVersion = ucDfmVersion;
 	pxDfmAlertData->xAlert.ucMaxSymptoms = (DFM_CFG_MAX_SYMPTOMS);
-	pxDfmAlertData->xAlert.ucFirmwareVersionSize = (DFM_FIRMWARE_VERSION_MAX_LEN);
+	pxDfmAlertData->xAlert.ucFirmwareVersionSize = firmware_version_size; // See comment at declaration.
 	pxDfmAlertData->xAlert.ucDescriptionSize = (DFM_DESCRIPTION_MAX_LEN);
 	pxDfmAlertData->xAlert.ulProduct = ulProduct;
 
