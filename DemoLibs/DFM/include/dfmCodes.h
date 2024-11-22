@@ -22,6 +22,8 @@
 #define DFM_CODES_H
 /* Alert Types */
 /* The following Alert Types are published and will not change. */
+
+#define DFM_TYPE_STOPWATCH (8) /* Stopwatch exceeded the expected duration */
 #define DFM_TYPE_HEARTBEAT (7) /* Heartbeat failure */
 #define DFM_TYPE_BAD_MESSAGE (6) /* Invalid/bad message received */
 #define DFM_TYPE_OVERLOAD (5) /* CPU Overload */
@@ -33,6 +35,9 @@
 
 /* Symptoms */
 /* The following Symptoms are published and will not change. */
+
+#define DFM_SYMPTOM_STOPWATCH_ID (9)   /* ADD THIS IN DEFAULT LIST */
+#define DFM_SYMPTOM_HIGH_WATERMARK (8) /* ADD THIS IN DEFAULT LIST */
 #define DFM_SYMPTOM_ARM_SCB_FCSR (7) /* CFSR (misspelled) */
 #define DFM_SYMPTOM_STACKPTR (6) /* Stack Pointer */
 #define DFM_SYMPTOM_PC (5) /* PC */
