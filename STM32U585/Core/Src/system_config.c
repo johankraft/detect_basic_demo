@@ -22,7 +22,7 @@
 
 /* Private typedef ---------------------------------------------------------------------------------------------------*/
 /* Private define ----------------------------------------------------------------------------------------------------*/
-#define PERIOD_VALUE 0x667U
+#define PERIOD_VALUE 0x66U
 #define PULSE_VALUE  PERIOD_VALUE/2U
 
 /* Private macro -----------------------------------------------------------------------------------------------------*/
@@ -211,6 +211,11 @@ static int lptim_config(void)
   return 0;
 }
 
+
+#include "trcRecorder.h"
+
+extern TraceISRHandle_t xISRHandleTimer;
+
 /**
   * @brief  Update event callback in non-blocking mode.
   * @param  hlptim : Pointer to LPTIM handle
@@ -218,9 +223,16 @@ static int lptim_config(void)
   */
 static void LPTIM_UpdateEventCallback(LPTIM_HandleTypeDef *hlptim)
 {
-  /* Toggle GREEN led */
-  BSP_LED_Toggle(LED_GREEN);
-  printf(".");
+	xTraceISRBegin(xISRHandleTimer);
+
+	/* Toggle GREEN led */
+	BSP_LED_Toggle(LED_GREEN);
+
+	extern void ISR_sensor(void);
+
+	ISR_sensor();
+
+	xTraceISREnd(0);
 }
 
 

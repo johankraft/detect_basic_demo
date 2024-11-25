@@ -18,12 +18,15 @@
 
 /* Includes ----------------------------------------------------------------------------------------------------------*/
 #include "main.h"
+#include "trcRecorder.h"
+#include "dfm.h"
 
 /* Private typedef ---------------------------------------------------------------------------------------------------*/
 /* Private define ----------------------------------------------------------------------------------------------------*/
 /* Private macro -----------------------------------------------------------------------------------------------------*/
 /* Private variables -------------------------------------------------------------------------------------------------*/
 /* Private function prototypes ---------------------------------------------------------------------------------------*/
+extern int main_baremetal( void );
 
 /**
   * @brief  Main program
@@ -38,6 +41,8 @@ int main(void)
      - Set NVIC Group Priority to 3
      - Low Level Initialization
   */
+  vTraceInitialize();
+
   HAL_Init();
 
   /* Enable the Instruction Cache */
@@ -49,10 +54,6 @@ int main(void)
   /* Initialize bsp resources */
   bsp_init();
 
-
-  /* Demonstration entry */
-  //app_entry();
-
   /* No buffer for printf usage, just print characters one by one.*/
    setbuf(stdout, NULL);
 
@@ -62,10 +63,21 @@ int main(void)
  	  process_error();
    }
 
+   /* Initialize Percepio TraceRecorder (stores events to ring buffer) */
+   xTraceEnable(TRC_START);
+
+   /* Initialize the Percepio DFM library for creating Alerts. */
+   if (xDfmInitializeForLocalUse() == DFM_FAIL)
+   {
+       	configPRINTF(("Failed to initialize DFM\r\n"));
+   }
+
    printf("STM32U585 demo platform\nNote: Timer ISR enabled -> LPTIM_UpdateEventCallback\n");
 
-  while (1)
-  {
-  }
+   main_baremetal();
+
+   while (1)
+   {
+   }
 }
 
