@@ -52,6 +52,10 @@ extern void vMainUARTPrintString( char * pcString );
 /* This will be called for errors. Point this to a suitable print function. This will also be used for DFM_DEBUG_PRINT messages. */
 #define DFM_ERROR_PRINT(msg) DFM_CFG_PRINT(msg)
 
+/* The maximum number of stopwatches (slots) */
+#define DFM_CFG_MAX_STOPWATCHES 4
+
+
 /**
  * @brief The maximum size of a "chunk" that will be stored or sent.
  * If a DFM payload (core dump, trace, etc) is larger than the chunk size, it will be divided into multiple

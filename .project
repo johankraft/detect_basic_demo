@@ -61,56 +61,6 @@
 			<locationURI>PROJECT_LOC/freertos_kernel/timers.c</locationURI>
 		</link>
 		<link>
-			<name>DemoLibs/DFM/config</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfm.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfm.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmAlert.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmAlert.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmCloud.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmCloud.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmCrashCatcher.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmCrashCatcher.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmEntry.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmEntry.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmKernelPort.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/dfmKernelPort.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmSession.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmSession.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/dfmStorage.c</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/dfmStorage.c</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>DemoLibs/TraceRecorder/.gitattributes</name>
 			<type>1</type>
 			<locationURI>PROJECT_LOC/DemoLibs/TraceRecorder/.gitattributes</locationURI>
@@ -349,71 +299,6 @@
 			<name>freertos_kernel/include/timers.h</name>
 			<type>1</type>
 			<locationURI>PROJECT_LOC/freertos_kernel/include/timers.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/config/dfmConfig.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/config/dfmConfig.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfm.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfm.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmAlert.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmAlert.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmCloud.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCloud.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmCloudPort.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/cloudports/AWS_MQTT/include/dfmCloudPort.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmCodes.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCodes.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmCrashCatcher.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmCrashCatcher.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmDefines.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmDefines.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmEntry.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmEntry.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmKernelPort.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/kernelports/FreeRTOS/include/dfmKernelPort.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmSession.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmSession.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmStorage.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmStorage.h</locationURI>
-		</link>
-		<link>
-			<name>DemoLibs/DFM/include/dfmTypes.h</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/DemoLibs/DFM/include/dfmTypes.h</locationURI>
 		</link>
 		<link>
 			<name>DemoLibs/TraceRecorder/config/trcConfig.h</name>

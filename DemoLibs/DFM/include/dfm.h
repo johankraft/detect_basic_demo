@@ -106,6 +106,7 @@ extern DfmUserCallback_t xDfmUserGetDeviceName;
 #include <dfmCloud.h>
 #include <dfmRetainedMemory.h>
 #include <dfmCodes.h>
+#include <dfmStopwatch.h>
 
 #ifndef DFM_CFG_ENABLED
 #error DFM_CFG_ENABLED not set in dfmConfig.h!
