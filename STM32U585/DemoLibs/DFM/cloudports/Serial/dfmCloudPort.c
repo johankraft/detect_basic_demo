@@ -20,7 +20,7 @@
 /* Prototype for the print function */
 extern void vMainUARTPrintString( char * pcString );
 
-#define DFM_PRINT_SERIAL_DATA(msg) vMainUARTPrintString(msg)
+#define DFM_PRINT_SERIAL_DATA(msg) printf(msg)
 
 	
 static DfmCloudPortData_t *pxCloudPortData = (void*)0;

@@ -22,7 +22,7 @@
 
 /* Private typedef ---------------------------------------------------------------------------------------------------*/
 /* Private define ----------------------------------------------------------------------------------------------------*/
-#define PERIOD_VALUE 0x66U
+#define PERIOD_VALUE 0x10U
 #define PULSE_VALUE  PERIOD_VALUE/2U
 
 /* Private macro -----------------------------------------------------------------------------------------------------*/
@@ -195,6 +195,7 @@ static int lptim_config(void)
   *  Pulse  = 49
   *  According to this configuration, the duty cycle will be equal to 50%
   */
+
   sConfig.Pulse      = PULSE_VALUE;
   sConfig.OCPolarity = LPTIM_OCPOLARITY_LOW;
   if (HAL_LPTIM_OC_ConfigChannel(&LPTIMHandle, &sConfig, LPTIM_CHANNEL_1) != HAL_OK)
@@ -223,16 +224,15 @@ extern TraceISRHandle_t xISRHandleTimer;
   */
 static void LPTIM_UpdateEventCallback(LPTIM_HandleTypeDef *hlptim)
 {
-	xTraceISRBegin(xISRHandleTimer);
-
 	/* Toggle GREEN led */
-	BSP_LED_Toggle(LED_GREEN);
+	//BSP_LED_Toggle(LED_GREEN);
 
-	extern void ISR_sensor(void);
+	extern void ISR_other(void);
 
-	ISR_sensor();
-
-	xTraceISREnd(0);
+	if (rand() % 8 == 0)
+	{
+		ISR_other();
+	}
 }
 
 

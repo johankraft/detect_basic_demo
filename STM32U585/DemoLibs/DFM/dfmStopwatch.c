@@ -78,11 +78,21 @@ void vDfmStopwatchEnd(dfmStopwatch_t* sw)
 
 			if (duration > sw->expected_duration)
 			{
-				snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch %s, new high: %u", sw->name, (unsigned int)sw->high_watermark);
+				snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch %s, new high: %u\n", sw->name, (unsigned int)sw->high_watermark);
 				DFM_DEBUG_PRINT(cDfmPrintBuffer);
 
 #if !defined(INCLUDE_STOPWATCH_UNIT_TEST)
-				prvDfmStopwatchAlert(cDfmPrintBuffer, sw->high_watermark, sw->id);
+				{
+					TRACE_ALLOC_CRITICAL_SECTION();
+
+					// Halting the demo app by disabling interrupt during output. Better solutions are possible.
+					TRACE_ENTER_CRITICAL_SECTION();
+
+					prvDfmStopwatchAlert(cDfmPrintBuffer, sw->high_watermark, sw->id);
+
+					TRACE_EXIT_CRITICAL_SECTION();
+				}
+
 #endif
 			}
 		}
@@ -140,7 +150,7 @@ void vDfmStopwatchClearAll(void)
 void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index)
 {
 	static DfmAlertHandle_t xAlertHandle;
-	if (xDfmAlertBegin(DFM_TYPE_OVERLOAD, msg, &xAlertHandle) == DFM_SUCCESS)
+	if (xDfmAlertBegin(DFM_TYPE_STOPWATCH, msg, &xAlertHandle) == DFM_SUCCESS)
 	{
 		void* pvBuffer = (void*)0;
 		uint32_t ulBufferSize = 0;

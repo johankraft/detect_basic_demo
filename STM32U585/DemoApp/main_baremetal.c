@@ -59,6 +59,8 @@ TraceISRHandle_t xISRHandleOther = 0;
  * - Added id field, where 0 is invalid. Allows for checking if a stopwatch has been initialized.
  * - Fixed warnings and removed old invalid include paths from project.
  *
+ * - Added "ready" events to get instances in Tz.
+ *
  * TODO:
  * - Add stopwatch (or watchdog monitor?) on buffer read - expected 1 ms... Add something that causes a delay.
  *   Perhaps another ISR that runs with a different rate, only occationally interfering.
@@ -87,6 +89,14 @@ TraceISRHandle_t xISRHandleOther = 0;
  *
  */
 
+typedef struct{
+	uint8_t value;
+	uint8_t seq_no;
+} bufferentry_t;
+
+uint8_t seq_no = 0;
+
+int eth_jobs_for_main_thread = 0;
 
 void ISR_sensor(void);
 uint8_t read_sensor(void);
@@ -96,33 +106,40 @@ int is_data_in_buffer(void);
 
 TraceStringHandle_t chn_sensor = NULL;
 TraceStringHandle_t chn_from_buffer = NULL;
+TraceStringHandle_t chn_buf_count = NULL;
 TraceStringHandle_t chn_mean = NULL;
+TraceStringHandle_t chn_log = NULL;
 
+int task_started = 0;
+
+dfmStopwatch_t* sw = NULL;
 
 void main_superloop(void)
 {
 	uint32_t sum = 0;
 	uint32_t count = 0;
 
-	while(1)
+	task_started = 1;
+
+	while (1)
 	{
 		uint8_t val;
 
-		while(is_data_in_buffer())
-		{
-		    val = read_from_buffer();
+		vDfmStopwatchBegin(sw);
 
-			if (chn_from_buffer != NULL)
-			{
-				xTracePrintF(chn_from_buffer, "%d", val);
-			}
+		while (is_data_in_buffer())
+		{
+			val = read_from_buffer();
 
 			sum += val;
 			count++;
 
-			if (count == 4)
+			int n = 1000 + (rand() % 200);
+			for (volatile int i = 0; i < n; i++);
+
+			if (count == 8)
 			{
-				uint8_t mean_value = (uint8_t)(sum/count);
+				uint8_t mean_value = (uint8_t) (sum / count);
 
 				sum = 0;
 				count = 0;
@@ -135,25 +152,45 @@ void main_superloop(void)
 			}
 		}
 
-		 xTraceTaskSwitch( (void*)TASK_IDLE, 0);
-		 HAL_Delay(1);
-		 if (rand() % 30 == 0)
-		 {
-			 xTraceISRBegin(xISRHandleOther);
-			 HAL_Delay(12);
-			 xTraceISREnd(0);
-		 }
-		 xTraceTaskSwitch( (void*)TASK_MAIN, 0);
+		while (eth_jobs_for_main_thread > 0)
+		{
+			//xTracePrint(chn_log, "Eth job");
+			eth_jobs_for_main_thread--;
+
+			int n = 10000;
+
+			if (rand() % 10 == 0)
+			{
+				n += 5000 + (rand() % 1000);
+			}
+			else
+			{
+				n += rand() % 200;
+			}
+			for (volatile int i = 0; i < n; i++);
+		}
+
+		vDfmStopwatchEnd(sw);
+
+		xTraceTaskSwitch((void*) TASK_IDLE, 0);
+		HAL_Delay(0);
+
+		xTraceTaskReady(TASK_MAIN); // Makes Tracealyzer split the thread execution into "instances".
+		xTraceTaskSwitch((void*) TASK_MAIN, 0);
 	}
 }
 
 
 
-uint8_t sensor_data[16];
+bufferentry_t sensor_data[16];
+
 volatile int8_t write_index = 0;
 volatile int8_t read_index = 0;
 uint8_t sim_counter = 20;
 int8_t incr = 1;
+
+volatile uint32_t nWrites = 0;
+volatile uint32_t nReads= 0;
 
 
 uint8_t read_sensor(void)
@@ -173,11 +210,6 @@ uint8_t read_sensor(void)
 		incr = 1;
 	}
 
-	if (chn_sensor != NULL)
-	{
-		xTracePrintF(chn_sensor, "%d", reading);
-	}
-
 	//printf("read_sensor: %d, %d, %d\n", sim_counter, rnd, reading);
 
 	return reading;
@@ -186,17 +218,63 @@ uint8_t read_sensor(void)
 
 void ISR_sensor(void)
 {
-	write_to_buffer( read_sensor() );
+	if (task_started)
+	{
+		xTraceISRBegin(xISRHandleTimer);
+		write_to_buffer( read_sensor() );
+		xTraceISREnd(0);
+	}
 }
+
+void ISR_other(void)
+{
+	xTraceISRBegin(xISRHandleOther);
+
+	int n = 1000 + (rand()%2000);
+	for (volatile int i = 0; i < n; i++);
+
+	eth_jobs_for_main_thread++;
+
+	xTraceISREnd(0);
+}
+
+void demo_systick_handler()
+{
+	ISR_sensor();
+}
+
+volatile int count_max = 0;
 
 void write_to_buffer(uint8_t value)
 {
-	sensor_data[write_index] = value;
+
+	sensor_data[write_index].value = value;
+	sensor_data[write_index].seq_no = seq_no++;
+
+	if (chn_sensor != NULL)
+	{
+		xTracePrintF(chn_sensor, "%d", sensor_data[write_index].value);
+	}
+
+	/*
+	nWrites++;
+	if (chn_buf_count != NULL)
+	{
+		int count = nWrites - nReads;
+
+		if (count > count_max)
+		{
+			xTracePrintF(chn_buf_count, "%d values in buffer",  count);
+			count_max = count;
+		}
+	}*/
+
 	write_index++;
 	if (write_index == 16)
 	{
 		write_index = 0;
 	}
+
 }
 
 
@@ -208,10 +286,41 @@ int is_data_in_buffer(void)
 /* Not handling read overrun, assumes caller checks is_data_in_buffer first */
 uint8_t read_from_buffer(void)
 {
+	static uint8_t last_seq_no = 255; /* -1 */
 	uint8_t reading;
 
-	reading = sensor_data[read_index];
+	reading = sensor_data[read_index].value;
+
+	if (sensor_data[read_index].seq_no != (uint8_t)(last_seq_no + 1))
+	{
+		printf("Data loss!\n");
+	}
+
+	last_seq_no = sensor_data[read_index].seq_no;
+
+	/*
+	if (chn_from_buffer != NULL)
+	{
+		xTracePrintF(chn_from_buffer, "%d", sensor_data[read_index].value);
+	}*/
+
 	read_index++;
+
+	/*
+	nReads++;
+
+	if (chn_buf_count != NULL)
+	{
+		int count = nWrites - nReads;
+
+		xTracePrintF(chn_buf_count, "%d values in buffer", count);
+
+		if (count > count_max)
+		{
+			count_max = count;
+		}
+	}*/
+
 	if (read_index == 16)
 	{
 		read_index = 0;
@@ -288,25 +397,34 @@ static void DemoUpdate(int counter)
 }
 */
 
+
 static void DemoInit(void)
 {
-	srand(TRC_HWTC_COUNT);
+	//srand(0); // Seed...
+
 	xTraceStringRegister("Sensor Data", &chn_sensor);
 	xTraceStringRegister("Mean Value", &chn_mean);
 	xTraceStringRegister("From Buffer", &chn_from_buffer);
+	xTraceStringRegister("Buffer Count", &chn_buf_count);
+	xTraceStringRegister("Log", &chn_log);
+
+	sw = xDfmStopwatchCreate("Reader", 1100000);
 }
 
 
 int main_baremetal( void )
 {
 	xTraceISRRegister("TimerISR", 1, &xISRHandleTimer);
-	xTraceISRRegister("OtherISR", 2, &xISRHandleOther);
+	xTraceISRRegister("EthernetISR", 2, &xISRHandleOther);
 
     /* Just to set a better name for the main thread...*/
     REGISTER_TASK(TASK_MAIN, "main-thread");
 
     /* Used for tracing the HAL_Delay call in the bare-metal superloop. */
     REGISTER_TASK(TASK_IDLE, "IDLE");
+
+    xTraceTaskReady(TASK_IDLE);
+    xTraceTaskReady(TASK_MAIN);
 
     /* Trace TASK_MAIN as the executing task... */
     xTraceTaskSwitch((void*)TASK_MAIN, 0);

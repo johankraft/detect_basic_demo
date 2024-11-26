@@ -120,6 +120,9 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   HAL_IncTick();
+
+  extern void demo_systick_handler(void);
+  demo_systick_handler();
 }
 
 /**********************************************************************************************************************/

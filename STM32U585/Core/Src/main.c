@@ -33,51 +33,53 @@ extern int main_baremetal( void );
   * @param  None
   * @retval None
   */
-int main(void)
-{
-  /* STM32U5xx HAL library initialization:
-     - Configure the Flash prefetch
-     - Configure the Systick to generate an interrupt each 1 msec
-     - Set NVIC Group Priority to 3
-     - Low Level Initialization
-  */
-  vTraceInitialize();
+int main(void) {
+	/* STM32U5xx HAL library initialization:
+	 - Configure the Flash prefetch
+	 - Configure the Systick to generate an interrupt each 1 msec
+	 - Set NVIC Group Priority to 3
+	 - Low Level Initialization
+	 */
+	vTraceInitialize();
 
-  HAL_Init();
 
-  /* Enable the Instruction Cache */
-  instruction_cache_enable();
+	HAL_Init();
 
-  /* Configure the System clock to have a frequency of 120 MHz */
-  system_clock_config();
+	/* Configure the System clock to have a frequency of 120 MHz */
+	system_clock_config();
 
-  /* Initialize bsp resources */
-  bsp_init();
+	/* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
+	HAL_InitTick(TICK_INT_PRIORITY);
 
-  /* No buffer for printf usage, just print characters one by one.*/
-   setbuf(stdout, NULL);
+	/* Enable the Instruction Cache */
+	instruction_cache_enable();
 
-   /* Initialize web server system */
-   if (system_init() != 0)
-   {
- 	  process_error();
-   }
+	/* Initialize bsp resources */
+	bsp_init();
 
-   /* Initialize Percepio TraceRecorder (stores events to ring buffer) */
-   xTraceEnable(TRC_START);
+	/* No buffer for printf usage, just print characters one by one.*/
+	setbuf(stdout, NULL);
 
-   /* Initialize the Percepio DFM library for creating Alerts. */
-   if (xDfmInitializeForLocalUse() == DFM_FAIL)
-   {
-       	configPRINTF(("Failed to initialize DFM\r\n"));
-   }
+	/* Initialize web server system */
+	if (system_init() != 0)
+	{
+		process_error();
+	}
 
-   printf("STM32U585 demo platform\nNote: Timer ISR enabled -> LPTIM_UpdateEventCallback\n");
+	/* Initialize Percepio TraceRecorder (stores events to ring buffer) */
+	xTraceEnable(TRC_START);
 
-   main_baremetal();
+	/* Initialize the Percepio DFM library for creating Alerts. */
+	if (xDfmInitializeForLocalUse() == DFM_FAIL)
+	{
+		configPRINTF(("Failed to initialize DFM\r\n"));
+	}
 
-   while (1)
-   {
-   }
+	printf("STM32U585 demo platform\nNote: Timer ISR enabled -> LPTIM_UpdateEventCallback\n");
+
+	main_baremetal();
+
+	while (1) {
+	}
 }
 
