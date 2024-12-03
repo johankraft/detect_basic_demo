@@ -42,7 +42,7 @@ extern "C" {
  * In other words, the first byte that must not be read by the stack dump.
  * For example, a reserved memory range following the SRAM.
  */
-#define DFM_CFG_ADDR_CHECK_NEXT 0x20018000
+#define DFM_CFG_ADDR_CHECK_NEXT 0x200C0000
 
 /**
  * @brief If this is set to 1 it will attempt to also save a trace with the Alert. This requires the Percepio Trace Recorder to also be included in the project.

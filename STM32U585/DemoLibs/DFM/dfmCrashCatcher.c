@@ -27,7 +27,7 @@ static void prvAddTracePayload(void);
 
 static DfmAlertHandle_t xAlertHandle = 0;
 
-dfmTrapInfo_t dfmTrapInfo = {-1, NULL, NULL, -1};
+dfmTrapInfo_t dfmTrapInfo = {-1, NULL, NULL, -1, 0};
 
 #if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
 static TraceStringHandle_t TzUserEventChannel = NULL;
@@ -105,16 +105,9 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 
 	stackPointer = pInfo->sp;
 
-#if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
-	if (TzUserEventChannel == 0)
-	{
-		xTraceStringRegister("ALERT", &TzUserEventChannel);
-	}
-#endif
-
 	ucBufferPos = &ucDataBuffer[0];
 
-	DFM_DEBUG_PRINT("\nDFM Alert\n");
+	//DFM_DEBUG_PRINT("\nDFM Alert\n");
 
 	if (dfmTrapInfo.alertType >= 0)
 	{
@@ -127,20 +120,34 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 		szFileName = prvGetFileNameFromPath(dfmTrapInfo.file);
 		snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "%s at %s:%u", dfmTrapInfo.message, szFileName, dfmTrapInfo.line);
 
-		DFM_DEBUG_PRINT("  DFM_TRAP(): ");
+		/*DFM_DEBUG_PRINT("DFM_TRAP(): ");
 		DFM_DEBUG_PRINT(cDfmPrintBuffer);
-		DFM_DEBUG_PRINT("\n");
+		DFM_DEBUG_PRINT("\n");*/
 
 		alerttype = dfmTrapInfo.alertType;
 	}
 	else
 	{
-		DFM_DEBUG_PRINT("  DFM: Hard fault\n");
+		//DFM_DEBUG_PRINT("DFM: Hard fault\n");
 
 		snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Hard fault exception (CFSR reg: 0x%08X)", (unsigned int)ARM_CORTEX_M_CFSR_REGISTER);
 
 		alerttype = DFM_TYPE_HARDFAULT;
 	}
+
+	#if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
+	if (TzUserEventChannel == 0)
+	{
+		xTraceStringRegister("ALERT", &TzUserEventChannel);
+	}
+	xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
+
+	xTracePause();
+	#endif
+
+	DFM_DEBUG_PRINT("\n DFM Alert: ");
+	DFM_DEBUG_PRINT(cDfmPrintBuffer);
+	DFM_DEBUG_PRINT("\n");
 
 	if (xDfmAlertBegin(alerttype, cDfmPrintBuffer, &xAlertHandle) == DFM_SUCCESS)
 	{
@@ -159,17 +166,12 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 		{
 			/* On hard faults */
 			xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_ARM_SCB_FCSR, ARM_CORTEX_M_CFSR_REGISTER);
-
-			/******************************************************************
-			 * TODO: Add MMAR and BFAR regs here as symptoms to get the address
-			 * of the problematic instruction. Would be a good symptom.
-			 *****************************************************************/
 		}
 
-#if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
-		xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
+		#if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
 		prvAddTracePayload();
-#endif
+		#endif
+
 		DFM_DEBUG_PRINT("  DFM: Storing the alert.\n");
 	}
 	else
@@ -178,8 +180,6 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 	}
 	DFM_DEBUG_PRINT("\n");
 
-	dfmTrapInfo.alertType = -1;
-	dfmTrapInfo.message = NULL;
 }
 
 #if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
@@ -187,10 +187,7 @@ static void prvAddTracePayload(void)
 {
 	void* pvBuffer = (void*)0;
 	uint32_t ulBufferSize = 0;
-	if (xTraceIsRecorderEnabled() == 1)
-	{
-		xTraceDisable();
-	}
+	xTracePause();
 	xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
 	xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
 }
@@ -306,7 +303,30 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void)
 
 	}
 
-	CRASH_FINALIZE();
+	// If triggered by DFM_TRAP
+	if (dfmTrapInfo.alertType != -1)
+	{
+		if (dfmTrapInfo.restart == 1)
+		{
+			CRASH_FINALIZE();
+		}
+		else
+		{
+			xTraceResume();
+		}
+
+		dfmTrapInfo.alertType = -1;
+		dfmTrapInfo.message = NULL;
+		dfmTrapInfo.restart = 0;
+		dfmTrapInfo.file = NULL;
+		dfmTrapInfo.line = 0;
+	}
+	else
+	{
+		// if triggered by hard fault or similar
+		CRASH_FINALIZE();
+	}
+
 	return CRASH_CATCHER_EXIT;
 }
 
@@ -315,7 +335,7 @@ void __stack_chk_fail(void)
 {
 	// If this happens, the stack has been corrupted by the previous function in the call stack.
 	// Note that the exact location of the stack corruption is not known, since detected when exiting the function.
-	DFM_TRAP(DFM_TYPE_ASSERT_FAILED, "Stack corruption detected");
+	DFM_TRAP(DFM_TYPE_STACK_CHK_FAILED, "Stack corruption detected", 1);
 }
 
 #endif

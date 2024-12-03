@@ -29,6 +29,16 @@
 static volatile __attribute__((section (".noinit"))) unsigned int last_test_case;
 static volatile __attribute__((section (".noinit"))) unsigned int last_test_case_control;
 
+
+/*** Test case: DFM_TRAP core dump without restart ***************************/
+void testCoreDumpNoRestart(int n)
+{
+	extern char cDfmPrintBuffer[128];
+	snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Creating core dump without restart (arg: %d)", n);
+
+	DFM_TRAP(DFM_TYPE_ASSERT_FAILED, cDfmPrintBuffer, 0);
+}
+
 /*** Test case: Hard fault exception  ****************************************/
 
 static int MakeFaultExceptionByIllegalRead(void)
@@ -87,8 +97,6 @@ void testBufferOverrun(void)
 void testAssertFailed(char* str)
 {
 	configASSERT( str != NULL );
-
-	configPRINTF(("Input: %s", str));
 }
 
 /*****************************************************************************/

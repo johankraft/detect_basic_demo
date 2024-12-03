@@ -32,94 +32,102 @@ volatile int ButtonPressed = 0;
  * are passed as arguments to xTraceTaskSwitch() for tracing when entering and
  * leaving the HAL_Delay call.
  *
- * This is only needed for bare-metal systems. When using a supported RTOS
- * such as FreeRTOS, the tasks are registered and traced automatically.
+ * Calling xTraceTaskSwitch and REGISTER_TASK manually like this is only needed
+ * for bare-metal systems. When using a supported RTOS such as FreeRTOS, all
+ * kernel tasks are traced automatically.
+ *
+ * Other alternatives for more detailed TraceRecorder tracing includes:
+ *  - User events (see TraceRecorder/include/trcPrint.h)
+ *  - State Machines (see TraceRecorder/include/trcStateMachine.h)
+ *  - Runnables (see TraceRecorder/include/trcRunnable.h)
+ *  - Interval Sets (see TraceRecorder/include/trcInterval.h)
+ *
  *****************************************************************************/
 #define REGISTER_TASK(ID, name) xTraceTaskRegisterWithoutHandle((void*)ID, name, 0)
 
+// Handles for baremetal "tasks" (see above)
 #define TASK_IDLE 100
 #define TASK_MAIN 101
 
-//static void DemoUpdate(int counter);
-static void DemoInit(void);
-
+// Handles for tracing ISRs
 TraceISRHandle_t xISRHandleTimer = 0;
 TraceISRHandle_t xISRHandleOther = 0;
 
-/*****
- * Changes:
- * - Added initial Stopwatch API. See serial output from alerts.
- * - Added xTracePause() and xTraceResume() to avoid reseting the trace.
- * - Optimized stopwatch API. Overhead now just 31-108 clock cycles on Arm.
- * - Solved hard fault issue in DFM caused by GCC bug on -O3.
- * - Demo app now remembers last test case, so it cycles through the alerts. Didn't require linker file changes (attribute noinit). Can be used to implement retained memory for any GCC target.
- * - Created a unit test framework and added 7 tests. Probably not complete, but seems decent for now. Consider adding a few more tests.
- * - Added new alert type and symptoms (server must be updated, see dfmCodes.h)
- * - Added print and clear functions in the API.
- * - Added id field, where 0 is invalid. Allows for checking if a stopwatch has been initialized.
- * - Fixed warnings and removed old invalid include paths from project.
- *
- * - Added "ready" events to get instances in Tz.
- *
- * TODO:
- * - Add stopwatch (or watchdog monitor?) on buffer read - expected 1 ms... Add something that causes a delay.
- *   Perhaps another ISR that runs with a different rate, only occationally interfering.
- *   And perhaps some if-statement in the main loop, that also adds to the execution time?
- *   When the perfect storm hits, the thread is delayed for too long.
- *   (near misses fairly common, error are rare but happen once in a while)
- *
- * - Finish and clean up demo code.
- * - Test loading alerts into Detect server.
+// Handles for state machine tracing (used for main thread)
+TraceStateMachineHandle_t reader_jobs;
+TraceStateMachineStateHandle_t reader_job_netw_msg;
+TraceStateMachineStateHandle_t reader_job_sens_data;
+TraceStateMachineStateHandle_t reader_idle;
+TraceStateMachineStateHandle_t reader_printf;
+TraceStateMachineStateHandle_t reader_gets;
 
- * - Consider adding a few more test cases.
- * - Allow for using DFM_TRAP without restarting.
- *
- * What to show in the demo?
- * - A plain "profiling" use-case (requirements)
- * - Sporadic "soft" error:
- * I'm simulating a sensor that is read by a (real) timer interrupt. This writes the data to a circular buffer,
- * and the main thread needs to read in a timely manner, or there will be data loss.
- * The main thread implements supersampling, i.e. it reads several samples and calculates the mean value.
- * This is monitored with user events so it can be plotted in Tracealyzer. But sometimes a disturbance/anomaly
- * delays the main thread so the buffer is filled more than usual, in worst case such that data is lost.
- * Here I'm just simulating another ISR for this, but will try to make a more realistic issue causing this delay,
- * that only happens occationally. Then I will catch the issue using a stopwatch that monitors the time between
- * buffer reads. What you see in this screenshot is just the sensor data, that "sets the scene" for the issue.
- *
- *
- */
-
-typedef struct{
-	uint8_t value;
-	uint8_t seq_no;
-} bufferentry_t;
-
-uint8_t seq_no = 0;
-
-int eth_jobs_for_main_thread = 0;
-
-void ISR_sensor(void);
-uint8_t read_sensor(void);
-void write_to_buffer(uint8_t value);
-uint8_t read_from_buffer(void);
-int is_data_in_buffer(void);
-
+// Handles for User Event channels
 TraceStringHandle_t chn_sensor = NULL;
 TraceStringHandle_t chn_from_buffer = NULL;
 TraceStringHandle_t chn_buf_count = NULL;
 TraceStringHandle_t chn_mean = NULL;
 TraceStringHandle_t chn_log = NULL;
 
-int task_started = 0;
-
+// Stopwatch
 dfmStopwatch_t* sw = NULL;
+
+
+// Demo app internals...
+void ISR_sensor(void);
+uint8_t read_sensor(void);
+void write_to_buffer(uint8_t value);
+uint8_t read_from_buffer(void);
+int is_data_in_buffer(void);
+void print_commands(void);
+void demo_command_interface(void);
+static void DemoInit(void);
+
+// A circular buffer where ISR_sensor writes its data. Read by main thread.
+typedef struct{
+	uint8_t value;
+	uint8_t seq_no;
+} bufferentry_t;
+
+bufferentry_t sensor_data[16];
+
+volatile int8_t write_index = 0;
+volatile int8_t read_index = 0;
+uint8_t seq_no = 0;
+
+// Simulates network jobs.
+int eth_jobs_for_main_thread = 0;
+
+// For generating the simulated sensor data (a triangular wave with noise added)
+uint8_t sim_counter = 20;
+int8_t incr = 1;
+
+// Demo control variables
+volatile int demo_interrupt_rate = 16;
+volatile int demo_isrs_enabled = 0;
+int poll = 0;
+
+
+// printf wrapper with state machine tracing. Pauses the demo's ISR handlers (generating stimuli to the demo app) to reduce the impact of the printf calls.
+#define DEMO_PRINTF(...) \
+	{ \
+	demo_isrs_enabled = 0; \
+	xTraceStateMachineSetState(reader_jobs, reader_printf); \
+	printf(__VA_ARGS__); \
+	xTraceStateMachineSetState(reader_jobs, reader_idle); \
+	demo_isrs_enabled = 1; \
+	}
 
 void main_superloop(void)
 {
 	uint32_t sum = 0;
 	uint32_t count = 0;
+	uint32_t demo_time = 0;
 
-	task_started = 1;
+	print_commands();
+
+	demo_isrs_enabled = 1;
+
+	xTraceStateMachineSetState(reader_jobs, reader_idle);
 
 	while (1)
 	{
@@ -129,16 +137,21 @@ void main_superloop(void)
 
 		while (is_data_in_buffer())
 		{
+			xTraceStateMachineSetState(reader_jobs, reader_job_sens_data);
+
 			val = read_from_buffer();
+
+			xTracePrintF(chn_log, "Sensor data (%d), sample %d/8", val, count+1);
 
 			sum += val;
 			count++;
 
-			int n = 1000 + (rand() % 200);
+			int n = 3000 + (rand() % 100);
 			for (volatile int i = 0; i < n; i++);
 
 			if (count == 8)
 			{
+
 				uint8_t mean_value = (uint8_t) (sum / count);
 
 				sum = 0;
@@ -154,14 +167,16 @@ void main_superloop(void)
 
 		while (eth_jobs_for_main_thread > 0)
 		{
-			//xTracePrint(chn_log, "Eth job");
+			xTraceStateMachineSetState(reader_jobs, reader_job_netw_msg);
+
+			xTracePrint(chn_log, "Network request");
 			eth_jobs_for_main_thread--;
 
-			int n = 10000;
+			int n = 5000;
 
 			if (rand() % 10 == 0)
 			{
-				n += 5000 + (rand() % 1000);
+				n += 8000 + (rand() % 2000);
 			}
 			else
 			{
@@ -170,10 +185,25 @@ void main_superloop(void)
 			for (volatile int i = 0; i < n; i++);
 		}
 
+		xTraceStateMachineSetState(reader_jobs, reader_idle);
+
 		vDfmStopwatchEnd(sw);
 
 		xTraceTaskSwitch((void*) TASK_IDLE, 0);
+
 		HAL_Delay(0);
+
+		if ((demo_time++ % 5000 == 0) && (poll == 1))
+		{
+			DEMO_PRINTF("\nSimulated ISR load: 1/%d - SW exp_max: %u, times_above: %u, high_watermark: %u\n", demo_interrupt_rate, (unsigned int)sw->expected_duration, (unsigned int)sw->times_above, (unsigned int)sw->high_watermark);
+		}
+
+		extern int kbhit(void);
+
+		if (kbhit())
+		{
+			demo_command_interface();
+		}
 
 		xTraceTaskReady(TASK_MAIN); // Makes Tracealyzer split the thread execution into "instances".
 		xTraceTaskSwitch((void*) TASK_MAIN, 0);
@@ -181,18 +211,20 @@ void main_superloop(void)
 }
 
 
+// Called sporadically, how often depend on "load" parameter (demo_interrupt_rate)
+void ethernet_isr_handler(void)
+{
+		xTraceISRBegin(xISRHandleOther);
 
-bufferentry_t sensor_data[16];
+		int n = 1000 + (rand()%2000);
+		for (volatile int i = 0; i < n; i++);
 
-volatile int8_t write_index = 0;
-volatile int8_t read_index = 0;
-uint8_t sim_counter = 20;
-int8_t incr = 1;
+		eth_jobs_for_main_thread++;
 
-volatile uint32_t nWrites = 0;
-volatile uint32_t nReads= 0;
+		xTraceISREnd(0);
+}
 
-
+// Called by ISR_sensor, simulates reading a sensor.
 uint8_t read_sensor(void)
 {
 	int8_t rnd = (rand() % 5) - 2; /* -2, -1, 0, 1, 2 */
@@ -210,44 +242,12 @@ uint8_t read_sensor(void)
 		incr = 1;
 	}
 
-	//printf("read_sensor: %d, %d, %d\n", sim_counter, rnd, reading);
-
 	return reading;
 }
 
-
-void ISR_sensor(void)
-{
-	if (task_started)
-	{
-		xTraceISRBegin(xISRHandleTimer);
-		write_to_buffer( read_sensor() );
-		xTraceISREnd(0);
-	}
-}
-
-void ISR_other(void)
-{
-	xTraceISRBegin(xISRHandleOther);
-
-	int n = 1000 + (rand()%2000);
-	for (volatile int i = 0; i < n; i++);
-
-	eth_jobs_for_main_thread++;
-
-	xTraceISREnd(0);
-}
-
-void demo_systick_handler()
-{
-	ISR_sensor();
-}
-
-volatile int count_max = 0;
-
+// Called by ISR_sensor, writes data to buffer.
 void write_to_buffer(uint8_t value)
 {
-
 	sensor_data[write_index].value = value;
 	sensor_data[write_index].seq_no = seq_no++;
 
@@ -256,34 +256,28 @@ void write_to_buffer(uint8_t value)
 		xTracePrintF(chn_sensor, "%d", sensor_data[write_index].value);
 	}
 
-	/*
-	nWrites++;
-	if (chn_buf_count != NULL)
-	{
-		int count = nWrites - nReads;
-
-		if (count > count_max)
-		{
-			xTracePrintF(chn_buf_count, "%d values in buffer",  count);
-			count_max = count;
-		}
-	}*/
-
 	write_index++;
 	if (write_index == 16)
 	{
 		write_index = 0;
 	}
-
 }
 
+// Called periodically every millisecond
+void ISR_sensor(void)
+{
+	xTraceISRBegin(xISRHandleTimer);
+	write_to_buffer( read_sensor() );
+	xTraceISREnd(0);
+}
 
+// Called by main thread, checks if data available in the buffer.
 int is_data_in_buffer(void)
 {
 	return read_index != write_index;
 }
 
-/* Not handling read overrun, assumes caller checks is_data_in_buffer first */
+// Called by main thread, reads data from buffer
 uint8_t read_from_buffer(void)
 {
 	static uint8_t last_seq_no = 255; /* -1 */
@@ -293,33 +287,12 @@ uint8_t read_from_buffer(void)
 
 	if (sensor_data[read_index].seq_no != (uint8_t)(last_seq_no + 1))
 	{
-		printf("Data loss!\n");
+		DEMO_PRINTF("Data loss!\n");
 	}
 
 	last_seq_no = sensor_data[read_index].seq_no;
 
-	/*
-	if (chn_from_buffer != NULL)
-	{
-		xTracePrintF(chn_from_buffer, "%d", sensor_data[read_index].value);
-	}*/
-
 	read_index++;
-
-	/*
-	nReads++;
-
-	if (chn_buf_count != NULL)
-	{
-		int count = nWrites - nReads;
-
-		xTracePrintF(chn_buf_count, "%d values in buffer", count);
-
-		if (count > count_max)
-		{
-			count_max = count;
-		}
-	}*/
 
 	if (read_index == 16)
 	{
@@ -329,93 +302,30 @@ uint8_t read_from_buffer(void)
 	return reading;
 }
 
-
-
-
-#ifdef OLD
-
-void main_superloop2(void)
-{
-    int counter = 0;
-    dfmStopwatch_t* my_stopwatch = xDfmStopwatchCreate("MyStopwatch1", 10);
-
-    if (my_stopwatch == NULL)
-    {
-    	printf("ERROR, my_stopwatch == NULL\n");
-    	return;
-    }
-
-    while (1)
-    {
-    	vDfmStopwatchBegin(my_stopwatch);
-    	DemoUpdate(counter);
-    	vDfmStopwatchEnd(my_stopwatch);
-
-    	counter++;
-
-        xTraceTaskSwitch( (void*)TASK_IDLE, 0);
-    	HAL_Delay(1);
-    	xTraceTaskSwitch( (void*)TASK_MAIN, 0);
-
-    }
-}
-
-
-static void DemoUpdate(int counter)
-{
-	DemoISRUpdate(counter);
-   	DemoStatesUpdate(counter);
-   	DemoUserEventsUpdate(counter);
-
-   	if (ButtonPressed == 1)
-   	{
-   		ButtonPressed = 0;
-   	    DemoAlert();
-   	}
-}
-
+// Registers TraceRecorder objects and DFM Stopwatch
 static void DemoInit(void)
 {
-	DemoAlertInit();
-    DemoISRInit();
-    DemoStatesInit();
-    DemoUserEventsInit();
-}
-
-
-#endif
-
-/*
-static void DemoUpdate(int counter)
-{
-
-	if (ButtonPressed == 1)
-   	{
-   		ButtonPressed = 0;
-   	    DemoAlert();
-   	}
-}
-*/
-
-
-static void DemoInit(void)
-{
-	//srand(0); // Seed...
+	xTraceISRRegister("TimerISR", 1, &xISRHandleTimer);
+	xTraceISRRegister("EthernetISR", 2, &xISRHandleOther);
 
 	xTraceStringRegister("Sensor Data", &chn_sensor);
 	xTraceStringRegister("Mean Value", &chn_mean);
 	xTraceStringRegister("From Buffer", &chn_from_buffer);
 	xTraceStringRegister("Buffer Count", &chn_buf_count);
-	xTraceStringRegister("Log", &chn_log);
+	xTraceStringRegister("Job", &chn_log);
 
-	sw = xDfmStopwatchCreate("Reader", 1100000);
+	xTraceStateMachineCreate("Reader Jobs", &reader_jobs);
+	xTraceStateMachineStateCreate(reader_jobs, "Network msg", &reader_job_netw_msg);
+	xTraceStateMachineStateCreate(reader_jobs, "Sensor data", &reader_job_sens_data);
+	xTraceStateMachineStateCreate(reader_jobs, "printf", &reader_printf);
+	xTraceStateMachineStateCreate(reader_jobs, "gets", &reader_gets);
+	xTraceStateMachineStateCreate(reader_jobs, "IDLE", &reader_idle);
+
+	sw = xDfmStopwatchCreate("Reader", 500000);
 }
-
 
 int main_baremetal( void )
 {
-	xTraceISRRegister("TimerISR", 1, &xISRHandleTimer);
-	xTraceISRRegister("EthernetISR", 2, &xISRHandleOther);
 
     /* Just to set a better name for the main thread...*/
     REGISTER_TASK(TASK_MAIN, "main-thread");
@@ -423,6 +333,7 @@ int main_baremetal( void )
     /* Used for tracing the HAL_Delay call in the bare-metal superloop. */
     REGISTER_TASK(TASK_IDLE, "IDLE");
 
+    // Perhaps not needed.
     xTraceTaskReady(TASK_IDLE);
     xTraceTaskReady(TASK_MAIN);
 
@@ -439,9 +350,94 @@ int main_baremetal( void )
     return 0;
 }
 
-void DemoOnButtonPressedBareMetal(void)
+void print_commands(void)
 {
-	ButtonPressed = 1;
+	DEMO_PRINTF("\nValid commands:"
+			   	"\n  test 1: failed ASSERT() with restart."
+				"\n  test 2: DFM_TRAP() without restart"
+				"\n  test 3: Hard fault exception"
+				"\n  test 4: buffer overrun, stack corruption"
+			    "\n  load <int>: set interrupt rate (lower value, higher rate)"
+			    "\n  print: show all stopwatches"
+			    "\n  poll on: prints stopwatch 0 every 5 s"
+			    "\n  poll off: stops printing every 5 s"
+			    "\n  clear: resets stopwatch 0\n\n");
 }
 
+void demo_command_interface(void)
+{
+	char buf[20];
 
+	extern int get_string(char *buf);
+	get_string(buf);
+
+	if (strncmp(buf, "load", 4) == 0)
+	{
+		char* pch = strtok (buf," ");
+		pch = strtok (NULL, " ");
+
+		if (pch == NULL)
+		{
+			DEMO_PRINTF("\nLoad is: 1/%u\n", demo_interrupt_rate);
+		}
+		else
+		{
+			int tmp = atoi(pch);
+			if (tmp > 0)
+			{
+				demo_interrupt_rate = tmp;
+				DEMO_PRINTF("\nNew load: %d\n", demo_interrupt_rate);
+			}
+		}
+	}
+	else if (strncmp(buf, "print", 5) == 0)
+	{
+		DEMO_PRINTF("\n");
+		vDfmStopwatchPrintAll();
+		DEMO_PRINTF("\n");
+	}else if (strncmp(buf, "poll on", 7) == 0)
+	{
+		poll = 1;
+		DEMO_PRINTF("\nPrinting status every 5 s...\n");
+	}
+	else if (strncmp(buf, "poll off", 8) == 0)
+	{
+		poll = 0;
+		DEMO_PRINTF("\nSilent now...\n");
+	}
+	else if (strncmp(buf, "clear", 5) == 0)
+	{
+		sw->high_watermark = 0;
+		sw->times_above = 0;
+		DEMO_PRINTF("\nStopwatch 0 cleared\n");
+	}
+	else if (strncmp(buf, "test 1", 6) == 0)
+	{
+		demo_isrs_enabled = 0;
+		testAssertFailed(NULL);
+		demo_isrs_enabled = 1;
+
+	}
+	else if (strncmp(buf, "test 2", 6) == 0)
+	{
+		demo_isrs_enabled = 0;
+		testCoreDumpNoRestart(42);
+		demo_isrs_enabled = 1;
+	}
+	else if (strncmp(buf, "test 3", 6) == 0)
+	{
+		demo_isrs_enabled = 0;
+		dosomething(32);
+		demo_isrs_enabled = 1;
+	}
+	else if (strncmp(buf, "test 4", 6) == 0)
+	{
+		demo_isrs_enabled = 0;
+		testBufferOverrun();
+		demo_isrs_enabled = 1;
+	}
+	else
+	{
+		print_commands();
+	}
+}

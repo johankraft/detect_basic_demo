@@ -23,6 +23,7 @@
 /* Alert Types */
 /* The following Alert Types are published and will not change. */
 
+#define DFM_TYPE_STACK_CHK_FAILED (9)
 #define DFM_TYPE_STOPWATCH (8) /* Stopwatch exceeded the expected duration */
 #define DFM_TYPE_HEARTBEAT (7) /* Heartbeat failure */
 #define DFM_TYPE_BAD_MESSAGE (6) /* Invalid/bad message received */

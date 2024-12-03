@@ -34,6 +34,7 @@ dfmStopwatch_t* xDfmStopwatchCreate(const char* name, uint32_t expected_max)
 		sw->high_watermark = 0;
 		sw->start_time = 0;
 		sw->id = stopwatch_count + 1; /* starts with 1, id 0 denotes invalid/uninitialized. */
+		sw->times_above = 0;
 
 		stopwatch_count++;
 	}
@@ -78,22 +79,12 @@ void vDfmStopwatchEnd(dfmStopwatch_t* sw)
 
 			if (duration > sw->expected_duration)
 			{
-				snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch %s, new high: %u\n", sw->name, (unsigned int)sw->high_watermark);
+				sw->times_above++;
+
+				snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Stopwatch \"%s\" reached %d, expected: %u\n", sw->name, (unsigned int)sw->high_watermark, (unsigned int)sw->expected_duration);
 				DFM_DEBUG_PRINT(cDfmPrintBuffer);
 
-#if !defined(INCLUDE_STOPWATCH_UNIT_TEST)
-				{
-					TRACE_ALLOC_CRITICAL_SECTION();
-
-					// Halting the demo app by disabling interrupt during output. Better solutions are possible.
-					TRACE_ENTER_CRITICAL_SECTION();
-
-					prvDfmStopwatchAlert(cDfmPrintBuffer, sw->high_watermark, sw->id);
-
-					TRACE_EXIT_CRITICAL_SECTION();
-				}
-
-#endif
+				prvDfmStopwatchAlert(cDfmPrintBuffer, sw->high_watermark, sw->id);
 			}
 		}
 	}

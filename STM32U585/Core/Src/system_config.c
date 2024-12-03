@@ -27,11 +27,7 @@
 
 /* Private macro -----------------------------------------------------------------------------------------------------*/
 /* Private variables -------------------------------------------------------------------------------------------------*/
-LPTIM_HandleTypeDef LPTIMHandle;
-
 /* Private function prototypes ---------------------------------------------------------------------------------------*/
-static int lptim_config(void);
-static void LPTIM_UpdateEventCallback(LPTIM_HandleTypeDef *hlptim);
 
 /* Functions prototypes ----------------------------------------------------------------------------------------------*/
 
@@ -44,12 +40,6 @@ int system_init(void)
 {
   /* Configure the console */
   if (console_config() != 0)
-  {
-    return -2;
-  }
-
-  /* Configure the LPTIM peripheral */
-  if (lptim_config() != 0)
   {
     return -2;
   }
@@ -144,97 +134,6 @@ int system_clock_config(void)
 
   return 0;
 }
-
-/**
-  * @brief  Initialize the LPTIM peripheral
-  * @param  None
-  * @retval Web Server status
-  */
-static int lptim_config(void)
-{
-  /* Channel_config structure declaration */
-  LPTIM_OC_ConfigTypeDef sConfig;
-
-  /*
-   *  Instance        = LPTIM1
-   *  Clock Source    = APB or LowPowerOSCillator (in this example LSE is
-   *                    already selected from the RCC stage)
-   *  Counter source  = External event.
-   *  Clock prescaler = 1 (No division)
-   *  Counter Trigger = Software trigger
-   *  Output Polarity = High
-   *  Update mode     = Immediate (Registers are immediately updated after any
-   *                    write access)
-   */
-  LPTIMHandle.Instance = LPTIM1;
-
-  LPTIMHandle.Init.Clock.Source                  = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  LPTIMHandle.Init.Clock.Prescaler               = LPTIM_PRESCALER_DIV1;
-  LPTIMHandle.Init.CounterSource                 = LPTIM_COUNTERSOURCE_INTERNAL;
-  LPTIMHandle.Init.UltraLowPowerClock.Polarity   = LPTIM_CLOCKPOLARITY_RISING;
-  LPTIMHandle.Init.UltraLowPowerClock.SampleTime = LPTIM_CLOCKSAMPLETIME_DIRECTTRANSITION;
-  LPTIMHandle.Init.Trigger.Source                = LPTIM_TRIGSOURCE_SOFTWARE;
-  LPTIMHandle.Init.Trigger.ActiveEdge            = LPTIM_ACTIVEEDGE_RISING;
-  LPTIMHandle.Init.Period                        = PERIOD_VALUE;
-  LPTIMHandle.Init.RepetitionCounter             = 0;
-
-  /* Initialize LPTIM peripheral according to the passed parameters */
-  if (HAL_LPTIM_Init(&LPTIMHandle) != HAL_OK)
-  {
-    return -2;
-  }
-
-  /* Register LPTIM callback */
-  if (HAL_LPTIM_RegisterCallback(&LPTIMHandle, HAL_LPTIM_UPDATE_EVENT_CB_ID, LPTIM_UpdateEventCallback) != HAL_OK)
-  {
-    return -2;
-  }
-
-  /*
-  *  Period = 99
-  *  Pulse  = 49
-  *  According to this configuration, the duty cycle will be equal to 50%
-  */
-
-  sConfig.Pulse      = PULSE_VALUE;
-  sConfig.OCPolarity = LPTIM_OCPOLARITY_LOW;
-  if (HAL_LPTIM_OC_ConfigChannel(&LPTIMHandle, &sConfig, LPTIM_CHANNEL_1) != HAL_OK)
-  {
-    return -2;
-  }
-
-  /* Start the LPTIM PWM */
-  if (HAL_LPTIM_PWM_Start_IT(&LPTIMHandle, LPTIM_CHANNEL_1) != HAL_OK)
-  {
-    return -2;
-  }
-
-  return 0;
-}
-
-
-#include "trcRecorder.h"
-
-extern TraceISRHandle_t xISRHandleTimer;
-
-/**
-  * @brief  Update event callback in non-blocking mode.
-  * @param  hlptim : Pointer to LPTIM handle
-  * @retval None
-  */
-static void LPTIM_UpdateEventCallback(LPTIM_HandleTypeDef *hlptim)
-{
-	/* Toggle GREEN led */
-	//BSP_LED_Toggle(LED_GREEN);
-
-	extern void ISR_other(void);
-
-	if (rand() % 8 == 0)
-	{
-		ISR_other();
-	}
-}
-
 
 void process_error(void)
 {

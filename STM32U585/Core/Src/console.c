@@ -19,6 +19,8 @@
 /* Includes ----------------------------------------------------------------------------------------------------------*/
 #include "console.h"
 
+#include "trcRecorder.h"
+
 #if defined(__ICCARM__)
 #include <LowLevelIOInterface.h>
 #endif /* __ICCARM__ */
@@ -46,7 +48,7 @@ int console_config(void)
 {
   /* Set parameter to be configured */
   Console_UARTHandle.Instance                    = USART1;
-  Console_UARTHandle.Init.BaudRate               = 115200;
+  Console_UARTHandle.Init.BaudRate               = 4000000;
   Console_UARTHandle.Init.WordLength             = UART_WORDLENGTH_8B;
   Console_UARTHandle.Init.StopBits               = UART_STOPBITS_1;
   Console_UARTHandle.Init.Parity                 = UART_PARITY_NONE;
@@ -90,16 +92,37 @@ void webserver_console_print_header(void)
   * @param  None
   * @retval Web Server status
   */
-#if (0)
-int webserver_console_get_ssid(ap_t *net_wifi_registred_hotspot,
-                                                   char *SSID)
+
+char _char_from_kbhit = 0;
+
+int kbhit(void)
+{
+	char ch;
+	if (HAL_UART_Receive(&Console_UARTHandle, (uint8_t *) &ch, 1, 0) != HAL_OK)
+	{
+	    return 0;
+	}
+	_char_from_kbhit = ch;
+	return ch;
+}
+
+extern volatile int demo_isrs_enabled;
+
+
+
+extern TraceStateMachineStateHandle_t reader_idle;
+extern TraceStateMachineHandle_t reader_jobs;
+extern TraceStateMachineStateHandle_t reader_gets;
+
+int get_string(char *buf)
 {
   char ch;
   uint32_t count = 0;
 
-  /* Print get SSID message */
-  printf("\r\n");
-  printf("*** Please enter your wifi ssid : =====================================================================\r\n");
+  // Disable demo ISRs to pause the demo app during printf calls (avoids overload)...
+  demo_isrs_enabled = 0;
+
+  xTraceStateMachineSetState(reader_jobs, reader_gets);
 
   /* Clear pending characters */
   if (HAL_UART_AbortReceive(&Console_UARTHandle) != HAL_OK)
@@ -107,43 +130,53 @@ int webserver_console_get_ssid(ap_t *net_wifi_registred_hotspot,
     return -1;
   }
 
-  /* Repeat receiving character until getting all SSID */
-  do
+  if (_char_from_kbhit != 0)
   {
-    /* Get entered character */
-    if (HAL_UART_Receive(&Console_UARTHandle, (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK)
-    {
-      return -2;
-    }
-
-    /* Store entered character */
-    SSID[count] = ch;
-    count++;
-
-    /* Print entered character */
-    if ((ch != 0) && (ch != '\r') && (ch != '\n'))
-    {
-      printf("%c",ch);
-    }
-
+	  printf("%c", _char_from_kbhit);
+	  buf[0] = _char_from_kbhit;
+	  count++;
   }
-  while ((ch != '\r') && (ch != 0) && (ch !='\n'));
 
+  if (buf[0] != '\n' && buf[0] != '\r')
+  {
+	  /* Repeat receiving character  */
+	  do
+	  {
+		/* Get entered character */
+		if (HAL_UART_Receive(&Console_UARTHandle, (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK)
+		{
+		  return -2;
+		}
+
+		/* Store entered character */
+		buf[count] = ch;
+		count++;
+
+		/* Print entered character */
+		if (ch != 0)
+		{
+		  printf("%c",ch);
+		}
+
+	  }
+	  while ((ch != '\r') && (ch != 0) && (ch !='\n'));
+  }
   /* Clear end of characters symbols */
   do
   {
-    SSID[count] = 0;
+    buf[count] = 0;
     count--;
-
   }
-  while((SSID[count] == '\r') || (SSID[count] == '\n'));
+  while((buf[count] == '\r') || (buf[count] == '\n'));
 
-  /* Store user SSID */
-  net_wifi_registred_hotspot->ssid = SSID;
+  demo_isrs_enabled = 1;
 
-  return 0;
+  xTraceStateMachineSetState(reader_jobs, reader_idle);
+
+  return count;
 }
 
+#if (0)
 /**
   * @brief  Get wifi PWD (PASSWORD) via hyperterminal
   * @param  None

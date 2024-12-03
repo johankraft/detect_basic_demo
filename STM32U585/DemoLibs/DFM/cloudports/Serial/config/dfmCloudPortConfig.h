@@ -34,13 +34,13 @@
  * task context. It is typically not needed on alerts from hard faults or
  * DFM_TRAP calls, as the prints then occur from an exception handler.
  */
-#define DFM_CFG_LOCK_SERIAL()
+#define DFM_CFG_LOCK_SERIAL() {extern volatile int demo_isrs_enabled; demo_isrs_enabled = 0;}
 
 /**
  * @brief Intended to release the serial port after having written a
  * block of alert data. If the kernel scheduler was disabled by the above
  * macro, it should be resumed here.
  */
-#define DFM_CFG_UNLOCK_SERIAL()
+#define DFM_CFG_UNLOCK_SERIAL() {extern volatile int demo_isrs_enabled; demo_isrs_enabled = 1;}
 
 #endif

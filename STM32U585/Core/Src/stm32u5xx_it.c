@@ -33,6 +33,8 @@ extern LPTIM_HandleTypeDef LPTIMHandle;
 /**********************************************************************************************************************/
 /*                                Cortex Processor Interruption and Exception Handlers                                */
 /**********************************************************************************************************************/
+
+#if (0)
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -82,6 +84,7 @@ void UsageFault_Handler(void)
   {
   }
 }
+#endif
 
 /**
   * @brief This function handles Secure fault.
@@ -117,12 +120,23 @@ void PendSV_Handler(void)
 /**
   * @brief This function handles System tick timer.
   */
+
+extern volatile int demo_isrs_enabled;
+
 void SysTick_Handler(void)
 {
+
   HAL_IncTick();
 
-  extern void demo_systick_handler(void);
-  demo_systick_handler();
+  extern void ethernet_ISR_simulator(void);
+  extern void ISR_sensor(void);
+
+  if (demo_isrs_enabled == 1)
+  {
+  	  ethernet_ISR_simulator();
+  	  ISR_sensor();
+  }
+
 }
 
 /**********************************************************************************************************************/
@@ -137,15 +151,14 @@ void SysTick_Handler(void)
   */
 void SPI2_IRQHandler(void)
 {
-//  HAL_SPI_IRQHandler(&Wifi_SPIHandle);
 }
 
 /**
   * @brief This function handles EXTI Line13 interrupt.
   */
-void EXTI14_IRQHandler(void)
+void EXTI13_IRQHandler(void)
 {
-  //HAL_GPIO_EXTI_IRQHandler(MXCHIP_NOTIFY_Pin);
+  HAL_GPIO_EXTI_IRQHandler(BUTTON_USER_PIN);
 }
 
 /**
@@ -153,7 +166,6 @@ void EXTI14_IRQHandler(void)
   */
 void EXTI15_IRQHandler(void)
 {
-  //HAL_GPIO_EXTI_IRQHandler(MXCHIP_FLOW_Pin);
 }
 
 /**
@@ -161,5 +173,4 @@ void EXTI15_IRQHandler(void)
   */
 void LPTIM1_IRQHandler(void)
 {
-  HAL_LPTIM_IRQHandler(&LPTIMHandle);
 }

@@ -53,6 +53,7 @@ typedef enum TraceRunnableRegisterMethod
  */
 traceResult xTraceRunnableRegister(const char* szName, TraceRunnableRegisterMethod_t uxRegisterMethod, TraceRunnableHandle_t* pxRunnableHandle);
 
+
 /**
  * @brief Creates an event indicating a runnable started.
  * 

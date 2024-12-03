@@ -17,6 +17,8 @@
   */
 
 /* Includes ----------------------------------------------------------------------------------------------------------*/
+#include <stdio.h>
+#include <stdlib.h>
 #include "main.h"
 #include "trcRecorder.h"
 #include "dfm.h"
@@ -42,7 +44,6 @@ int main(void) {
 	 */
 	vTraceInitialize();
 
-
 	HAL_Init();
 
 	/* Configure the System clock to have a frequency of 120 MHz */
@@ -60,11 +61,9 @@ int main(void) {
 	/* No buffer for printf usage, just print characters one by one.*/
 	setbuf(stdout, NULL);
 
-	/* Initialize web server system */
-	if (system_init() != 0)
-	{
-		process_error();
-	}
+	console_config();
+
+	BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
 
 	/* Initialize Percepio TraceRecorder (stores events to ring buffer) */
 	xTraceEnable(TRC_START);
@@ -75,11 +74,39 @@ int main(void) {
 		configPRINTF(("Failed to initialize DFM\r\n"));
 	}
 
-	printf("STM32U585 demo platform\nNote: Timer ISR enabled -> LPTIM_UpdateEventCallback\n");
+	printf("\nPercepio Detect Stopwatch Demo\n\n");
 
 	main_baremetal();
 
 	while (1) {
 	}
 }
+
+extern int demo_interrupt_rate;
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin >> 13 == 1) // User Button is Pin 13
+	{
+		demo_interrupt_rate = demo_interrupt_rate - 4;
+
+		if (demo_interrupt_rate ==  0)
+		{
+			demo_interrupt_rate = 16;
+		}
+	}
+}
+
+
+void ethernet_ISR_simulator(void)
+{
+	if ( rand() % demo_interrupt_rate == 0)
+	{
+		extern void ethernet_isr_handler(void);
+
+		ethernet_isr_handler();
+	}
+}
+
+
 

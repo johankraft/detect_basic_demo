@@ -8,6 +8,7 @@ typedef struct {
 	uint32_t expected_duration;
 	uint32_t high_watermark;
 	uint32_t id; /* Starts with 1, 0 is invalid */
+	uint32_t times_above;
 	const char* name;
 } dfmStopwatch_t;
 

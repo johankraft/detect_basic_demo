@@ -322,7 +322,7 @@ extern "C" {
 #include "dfm.h"
 #include "dfmCrashCatcher.h"
 
-#define configASSERT( x )  if( ( x ) == 0 ){ DFM_TRAP(DFM_TYPE_ASSERT_FAILED, "Assert failed") }
+#define configASSERT( x )  if( ( x ) == 0 ){ DFM_TRAP(DFM_TYPE_ASSERT_FAILED, "Assert failed", 1); }
 
 #define configPRINTF( x )          printf x
 
