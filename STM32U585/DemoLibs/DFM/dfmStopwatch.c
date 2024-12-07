@@ -17,6 +17,15 @@ void prvStopwatchPrint(dfmStopwatch_t* sw, char* testresult);
 void prvDfmPrintHeader(void);
 void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index);
 
+uint32_t xDfmStopwatchHighWatermarkGet(uint32_t index)
+{
+	if (stopwatch_count < DFM_CFG_MAX_STOPWATCHES)
+	{
+		return stopwatches[index].high_watermark;
+	}
+	return 0;
+}
+
 
 dfmStopwatch_t* xDfmStopwatchCreate(const char* name, uint32_t expected_max)
 {

@@ -25,8 +25,7 @@ void vDfmStopwatchClearAll(void);
 
 void vDfmStopwatchPrintAll(void);
 
-
-
+uint32_t xDfmStopwatchHighWatermarkGet(uint32_t index);
 
 
 #endif

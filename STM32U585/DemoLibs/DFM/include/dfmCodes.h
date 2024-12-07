@@ -23,6 +23,7 @@
 /* Alert Types */
 /* The following Alert Types are published and will not change. */
 
+#define DFM_TYPE_METRICS_REPORT (11)
 #define DFM_TYPE_STACK_CHK_FAILED (9)
 #define DFM_TYPE_STOPWATCH (8) /* Stopwatch exceeded the expected duration */
 #define DFM_TYPE_HEARTBEAT (7) /* Heartbeat failure */
@@ -36,6 +37,11 @@
 
 /* Symptoms */
 /* The following Symptoms are published and will not change. */
+
+#define DFM_SYMPTOM_WATCHDOG4 (13)
+#define DFM_SYMPTOM_WATCHDOG3 (12)
+#define DFM_SYMPTOM_WATCHDOG2 (11)
+#define DFM_SYMPTOM_WATCHDOG1 (10)
 
 #define DFM_SYMPTOM_STOPWATCH_ID (9)   /* ADD THIS IN DEFAULT LIST */
 #define DFM_SYMPTOM_HIGH_WATERMARK (8) /* ADD THIS IN DEFAULT LIST */

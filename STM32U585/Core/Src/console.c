@@ -48,7 +48,7 @@ int console_config(void)
 {
   /* Set parameter to be configured */
   Console_UARTHandle.Instance                    = USART1;
-  Console_UARTHandle.Init.BaudRate               = 4000000;
+  Console_UARTHandle.Init.BaudRate               = 1000000;
   Console_UARTHandle.Init.WordLength             = UART_WORDLENGTH_8B;
   Console_UARTHandle.Init.StopBits               = UART_STOPBITS_1;
   Console_UARTHandle.Init.Parity                 = UART_PARITY_NONE;

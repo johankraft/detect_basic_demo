@@ -82,31 +82,13 @@ int main(void) {
 	}
 }
 
-extern int demo_interrupt_rate;
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin >> 13 == 1) // User Button is Pin 13
 	{
-		demo_interrupt_rate = demo_interrupt_rate - 4;
-
-		if (demo_interrupt_rate ==  0)
-		{
-			demo_interrupt_rate = 16;
-		}
+		DFM_TRAP(DFM_TYPE_MANUAL_TRACE, "Blue button pressed.", 0);
 	}
 }
-
-
-void ethernet_ISR_simulator(void)
-{
-	if ( rand() % demo_interrupt_rate == 0)
-	{
-		extern void ethernet_isr_handler(void);
-
-		ethernet_isr_handler();
-	}
-}
-
 
 
