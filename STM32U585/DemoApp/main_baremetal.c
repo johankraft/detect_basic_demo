@@ -200,18 +200,6 @@ void main_superloop(void)
 		if ((demo_time++ % 5000 == 0) && (poll == 1))
 		{
 			DEMO_PRINTF("\nSimulated ISR load: 1/%d - SW exp_max: %u, times_above: %u, high_watermark: %u\n", demo_interrupt_rate, (unsigned int)sw->expected_duration, (unsigned int)sw->times_above, (unsigned int)sw->high_watermark);
-
-			/*
-			// Experimental: use a small DFM alert (without payloads) to periodically report metrics as "symptoms".
-			DfmAlertHandle_t alert;
-
-			xDfmAlertBegin(DFM_TYPE_METRICS_REPORT, "Recent metrics", &alert);
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG1, xDfmStopwatchHighWatermarkGet(0));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG2, xDfmStopwatchHighWatermarkGet(1));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG3, xDfmStopwatchHighWatermarkGet(2));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG4, xDfmStopwatchHighWatermarkGet(3));
-			xDfmAlertEnd(alert);
-			*/
 		}
 
 		extern int kbhit(void);
