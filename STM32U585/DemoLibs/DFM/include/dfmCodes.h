@@ -35,7 +35,7 @@
 /* Symptoms */
 #define DFM_SYMPTOM_STOPWATCH_ID (9)
 #define DFM_SYMPTOM_HIGH_WATERMARK (8)
-#define DFM_SYMPTOM_ARM_SCB_FCSR (7) /* CFSR (misspelled) */
+#define DFM_SYMPTOM_ARM_SCB_FCSR (7) /* CFSR (fault status register) */
 #define DFM_SYMPTOM_STACKPTR (6) /* Stack Pointer */
 #define DFM_SYMPTOM_PC (5) /* PC */
 #define DFM_SYMPTOM_LINE (4) /* Line */
