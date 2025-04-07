@@ -170,8 +170,13 @@ void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index)
 		xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
 		xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
 
+		#ifdef DFM_SYMPTOM_HIGH_WATERMARK
 		xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_HIGH_WATERMARK, high_watermark);
+		#endif
+
+		#ifdef DFM_SYMPTOM_STOPWATCH_ID
 		xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_STOPWATCH_ID, stopwatch_index);
+		#endif
 
 		/* Assumes "cloud port" is a UART or similar, that is always available. */
 		if (xDfmAlertEnd(xAlertHandle) != DFM_SUCCESS)

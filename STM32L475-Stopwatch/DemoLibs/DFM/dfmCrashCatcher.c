@@ -107,8 +107,6 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 
 	ucBufferPos = &ucDataBuffer[0];
 
-	//DFM_DEBUG_PRINT("\nDFM Alert\n");
-
 	if (dfmTrapInfo.alertType >= 0)
 	{
 		/* On the DFM_TRAP macro.
@@ -120,17 +118,12 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 		szFileName = prvGetFileNameFromPath(dfmTrapInfo.file);
 		snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "%s at %s:%u", dfmTrapInfo.message, szFileName, dfmTrapInfo.line);
 
-		/*DFM_DEBUG_PRINT("DFM_TRAP(): ");
-		DFM_DEBUG_PRINT(cDfmPrintBuffer);
-		DFM_DEBUG_PRINT("\n");*/
-
 		alerttype = dfmTrapInfo.alertType;
 	}
 	else
 	{
-		//DFM_DEBUG_PRINT("DFM: Hard fault\n");
-
-		snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Hard fault exception (CFSR reg: 0x%08X)", (unsigned int)ARM_CORTEX_M_CFSR_REGISTER);
+		/* On processor fault handlers (not DFM_TRAP) */
+		snprintf(cDfmPrintBuffer, sizeof(cDfmPrintBuffer), "Fault exception, CFSR: 0x%08X", (unsigned int)ARM_CORTEX_M_CFSR_REGISTER);
 
 		alerttype = DFM_TYPE_HARDFAULT;
 	}
@@ -153,19 +146,31 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 	{
 		(void)xDfmKernelPortGetCurrentTaskName(&szCurrentTaskName);
 
+		#ifdef DFM_SYMPTOM_CURRENT_TASK
 		xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_CURRENT_TASK, prvCalculateChecksum(szCurrentTaskName, 32));
+		#endif
+
+		#ifdef DFM_SYMPTOM_STACKPTR
 		xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_STACKPTR, pInfo->sp);
+		#endif
 
 		if (dfmTrapInfo.alertType >= 0)
 		{
 			/* On DFM_TRAP */
+			#ifdef DFM_SYMPTOM_FILE
 			xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_FILE, prvCalculateChecksum(szFileName, 32));
+			#endif
+
+			#ifdef DFM_SYMPTOM_LINE
 			xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_LINE, dfmTrapInfo.line);
+			#endif
 		}
 		else
 		{
 			/* On hard faults */
-			xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_ARM_SCB_FCSR, ARM_CORTEX_M_CFSR_REGISTER);
+			#ifdef DFM_SYMPTOM_CFSR
+			xDfmAlertAddSymptom(xAlertHandle, DFM_SYMPTOM_CFSR, ARM_CORTEX_M_CFSR_REGISTER);
+			#endif
 		}
 
 		#if ((DFM_CFG_CRASH_ADD_TRACE) >= 1)
@@ -333,9 +338,10 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void)
 /* Called by gcc stack-checking code when using the gcc option -fstack-protector-strong */
 void __stack_chk_fail(void)
 {
-	// If this happens, the stack has been corrupted by the previous function in the call stack.
-	// Note that the exact location of the stack corruption is not known, since detected when exiting the function.
+	#ifdef DFM_TYPE_STACK_CHK_FAILED
+	// The stack has been corrupted by the previous function in the call stack (before __stack_chk_fail)
 	DFM_TRAP(DFM_TYPE_STACK_CHK_FAILED, "Stack corruption detected", 1);
+	#endif
 }
 
 #endif

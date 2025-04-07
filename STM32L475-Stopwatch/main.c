@@ -1,27 +1,3 @@
-/*
- * FreeRTOS V1.4.7
- * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * http://aws.amazon.com/freertos
- * http://www.FreeRTOS.org
- */
 
 #include "dfmStoragePort.h"
 #include "main.h"
@@ -39,20 +15,11 @@
 #include "demo_user_events.h"
 #include "demo_isr.h"
 
-/******************************************************************************
- * DEMO_TYPE
- *
- * Sets if the demo should run on FreeRTOS or using a "bare-metal" loop.
- *
- * Valid options:
- * - DEMO_BAREMETAL: Superloop only, FreeRTOS not used.
- * - DEMO_FREERTOS: Using FreeRTOS to run the application.
- *****************************************************************************/
-#define DEMO_TYPE DEMO_BAREMETAL
-
 static void SystemClock_Config( void );
 static void Console_UART_Init( void );
 static void prvMiscInitialization( void );
+
+extern void main_baremetal( void );
 
 /**
  * @brief Application runtime entry point.
@@ -72,17 +39,7 @@ int main( void )
     	configPRINTF(("Failed to initialize DFM\r\n"));
     }
 
-#if (DEMO_TYPE == DEMO_BAREMETAL)
-
-    extern void main_baremetal( void );
     main_baremetal();
-
-#elif (DEMO_TYPE == DEMO_FREERTOS)
-
-    extern void main_freertos( void );
-    main_freertos();
-
-#endif
 
     return 0;
 }
@@ -208,10 +165,8 @@ int kbhit(void)
 }
 
 extern volatile int demo_isrs_enabled;
-extern TraceStateMachineStateHandle_t reader_idle;
-extern TraceStateMachineHandle_t reader_jobs;
-extern TraceStateMachineStateHandle_t reader_gets;
 
+/* Reads a string from the STLINK VCOM port (could not get scanf to work) */
 int get_string(char *buf)
 {
   char ch;
@@ -219,8 +174,6 @@ int get_string(char *buf)
 
   // Disable demo ISRs to pause the demo app during printf calls (avoids overload)...
   demo_isrs_enabled = 0;
-
-  xTraceStateMachineSetState(reader_jobs, reader_gets);
 
   /* Clear pending characters */
   if (HAL_UART_AbortReceive(xConsoleUart->pxHuart) != HAL_OK)
@@ -269,8 +222,6 @@ int get_string(char *buf)
 
   demo_isrs_enabled = 1;
 
-  xTraceStateMachineSetState(reader_jobs, reader_idle);
-
   return count;
 }
 
@@ -300,7 +251,6 @@ void HAL_TIM_PeriodElapsedCallback( TIM_HandleTypeDef * htim )
     	ethernet_ISR_simulator();
      	ISR_sensor();
     }
-
 }
 
 
@@ -377,7 +327,7 @@ void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
 {
     if (GPIO_Pin == USER_BUTTON_PIN )
     {
-    	DFM_TRAP(DFM_TYPE_MANUAL_TRACE, "Blue button pressed.", 0);
+    	// Blue button pressed
     }
 }
 

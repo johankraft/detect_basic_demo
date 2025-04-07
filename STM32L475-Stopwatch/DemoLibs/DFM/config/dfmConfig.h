@@ -34,7 +34,7 @@ extern "C" {
 /**
  * @brief The firmware version. This needs to be set to differentiate the alerts between versions.
  */
-#define DFM_CFG_FIRMWARE_VERSION "X.Y.Z"
+#define DFM_CFG_FIRMWARE_VERSION "DemoSTM32L4-20250402"
 
 /**
  * @brief An identifier of the product type.

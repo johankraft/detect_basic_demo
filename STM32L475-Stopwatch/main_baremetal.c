@@ -6,8 +6,6 @@
 #include "stdint.h"
 #include "stdarg.h"
 
-//#include "iot_uart.h"
-
 #include "trcRecorder.h"
 #include "dfm.h"
 #include "dfmCrashCatcher.h"
@@ -56,8 +54,6 @@ TraceStateMachineHandle_t reader_jobs;
 TraceStateMachineStateHandle_t reader_job_netw_msg;
 TraceStateMachineStateHandle_t reader_job_sens_data;
 TraceStateMachineStateHandle_t reader_idle;
-TraceStateMachineStateHandle_t reader_printf;
-TraceStateMachineStateHandle_t reader_gets;
 
 // Handles for User Event channels
 TraceStringHandle_t chn_sensor = NULL;
@@ -77,9 +73,12 @@ uint8_t read_sensor(void);
 void write_to_buffer(uint8_t value);
 uint8_t read_from_buffer(void);
 int is_data_in_buffer(void);
-void print_commands(void);
-void demo_command_interface(void);
+void print_demo_commands(void);
+void run_demo_command(char* buf);
 static void DemoInit(void);
+
+extern int kbhit(void);
+extern int get_string(char *buf);
 
 // A circular buffer where ISR_sensor writes its data. Read by main thread.
 typedef struct{
@@ -105,14 +104,18 @@ volatile int demo_interrupt_rate = 16;
 volatile int demo_isrs_enabled = 0;
 int poll = 0;
 
+uint32_t demo_time = 0;
+uint32_t command_time = 0;
 
-// printf wrapper with state machine tracing. Pauses the demo's ISR handlers (generating stimuli to the demo app) to reduce the impact of the printf calls.
+#define DEMO_CMD_MAX_LEN 32
+char demo_command[DEMO_CMD_MAX_LEN];
+
+/* Wrapper for printf, pausing the ISR inputs to avoid data loss in the sensor_data queue
+ * during the printf calls. This is not representative for real applications. */
 #define DEMO_PRINTF(...) \
 	{ \
 	demo_isrs_enabled = 0; \
-	xTraceStateMachineSetState(reader_jobs, reader_printf); \
 	printf(__VA_ARGS__); \
-	xTraceStateMachineSetState(reader_jobs, reader_idle); \
 	demo_isrs_enabled = 1; \
 	}
 
@@ -120,9 +123,10 @@ void main_superloop(void)
 {
 	uint32_t sum = 0;
 	uint32_t count = 0;
-	uint32_t demo_time = 0;
 
-	print_commands();
+	uint32_t stopwatch_alert_count = 0;
+
+	print_demo_commands();
 
 	demo_isrs_enabled = 1;
 
@@ -134,6 +138,8 @@ void main_superloop(void)
 	while (1)
 	{
 		uint8_t val;
+
+		stopwatch_alert_count = sw->times_above;
 
 		// Detect stopwatch, starts monitoring the runtime of this thread.
 		vDfmStopwatchBegin(sw);
@@ -149,12 +155,12 @@ void main_superloop(void)
 			sum += val;
 			count++;
 
+			// Simulate longer execution time
 			int n = 3000 + (rand() % 100);
 			for (volatile int i = 0; i < n; i++);
 
 			if (count == 8)
 			{
-
 				uint8_t mean_value = (uint8_t) (sum / count);
 
 				sum = 0;
@@ -175,8 +181,8 @@ void main_superloop(void)
 			xTracePrint(chn_log, "Network request");
 			eth_jobs_for_main_thread--;
 
+			// Simulate longer execution time
 			int n = 5000;
-
 			if (rand() % 10 == 0)
 			{
 				n += 8000 + (rand() % 2000);
@@ -193,45 +199,53 @@ void main_superloop(void)
 		// Checks the elapsed time since vDfmStopwatchStart, output trace if over threshold.
 		vDfmStopwatchEnd(sw);
 
+		// For clearer demo, avoid multiple stopwatch alerts in series.
+		if (sw->times_above > stopwatch_alert_count)
+		{
+			demo_interrupt_rate = 16; // Default load (not causing stopwatch alerts)
+			DEMO_PRINTF("\nRestored default interrupt probability (1/16)\n");
+		}
+
+		// Command from the serial interface are buffered and executed here.
+		if ((demo_time == command_time) && (command_time > 0))
+		{
+			run_demo_command(demo_command);
+		}
+
 		xTraceTaskSwitch((void*) TASK_IDLE, 0);
 
 		HAL_Delay(0);
 
-		if ((demo_time++ % 5000 == 0) && (poll == 1))
+		demo_time++;
+
+		if ((demo_time % 5000 == 0) && (poll == 1))
 		{
-			DEMO_PRINTF("\nSimulated ISR load: 1/%d - SW exp_max: %u, times_above: %u, high_watermark: %u\n", demo_interrupt_rate, (unsigned int)sw->expected_duration, (unsigned int)sw->times_above, (unsigned int)sw->high_watermark);
-
-
-			// Test: use a small DFM alert (without payloads) to periodically report metrics as "symptoms".
-			/*
-			DfmAlertHandle_t alert;
-			xDfmAlertBegin(DFM_TYPE_METRICS_REPORT, "Recent metrics", &alert);
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG1, xDfmStopwatchHighWatermarkGet(0));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG2, xDfmStopwatchHighWatermarkGet(1));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG3, xDfmStopwatchHighWatermarkGet(2));
-			xDfmAlertAddSymptom(alert, DFM_SYMPTOM_WATCHDOG4, xDfmStopwatchHighWatermarkGet(3));
-			xDfmAlertEnd(alert);
-			*/
+			DEMO_PRINTF("\nInterrupt probability: 1/%d - SW exp_max: %u, times_above: %u, high_watermark: %u\n", demo_interrupt_rate, (unsigned int)sw->expected_duration, (unsigned int)sw->times_above, (unsigned int)sw->high_watermark);
 		}
 
-		extern int kbhit(void);
-
+		// If a key is pressed, read a string (command) from the STLINK VCOM port (reads until newline, blocking)
 		if (kbhit())
 		{
-			demo_command_interface();
+				get_string(demo_command);
+				DEMO_PRINTF("\n");
+
+				// Demo commands are executed during the "busy period", for more realistic traces.
+				command_time = demo_time + 800;
 		}
 
-		xTraceTaskReady(TASK_MAIN); // Makes Tracealyzer split the thread execution into "instances".
+		// Makes Tracealyzer show the next job as a new "instance".
+		xTraceTaskReady(TASK_MAIN);
+
 		xTraceTaskSwitch((void*) TASK_MAIN, 0);
 	}
 }
-
 
 // Called sporadically, how often depend on "load" parameter (demo_interrupt_rate)
 void ethernet_isr_handler(void)
 {
 		xTraceISRBegin(xISRHandleOther);
 
+		// Simulate longer execution time
 		int n = 1000 + (rand()%2000);
 		for (volatile int i = 0; i < n; i++);
 
@@ -303,7 +317,9 @@ uint8_t read_from_buffer(void)
 
 	if (sensor_data[read_index].seq_no != (uint8_t)(last_seq_no + 1))
 	{
-		DEMO_PRINTF("Data loss!\n");
+		// Main thread has not been able to read all data in time.
+		// Logging this to TraceRecorder. Another option is to use DFM_TRAP to trigger an alert.
+		xTracePrint(chn_log, "Data loss!");
 	}
 
 	last_seq_no = sensor_data[read_index].seq_no;
@@ -331,13 +347,9 @@ static void DemoInit(void)
 	xTraceStringRegister("Job", &chn_log);
 
 	xTraceStateMachineCreate("Reader Jobs", &reader_jobs);
-	xTraceStateMachineStateCreate(reader_jobs, "Network msg", &reader_job_netw_msg);
-	xTraceStateMachineStateCreate(reader_jobs, "Sensor data", &reader_job_sens_data);
-	xTraceStateMachineStateCreate(reader_jobs, "printf", &reader_printf);
-	xTraceStateMachineStateCreate(reader_jobs, "gets", &reader_gets);
+	xTraceStateMachineStateCreate(reader_jobs, "Job: Network msg", &reader_job_netw_msg);
+	xTraceStateMachineStateCreate(reader_jobs, "Job: Sensor data", &reader_job_sens_data);
 	xTraceStateMachineStateCreate(reader_jobs, "IDLE", &reader_idle);
-
-
 }
 
 int main_baremetal( void )
@@ -366,47 +378,23 @@ int main_baremetal( void )
     return 0;
 }
 
-void print_commands(void)
+void print_demo_commands(void)
 {
-	DEMO_PRINTF("\nValid commands:"
-			   	"\n  test 1: failed ASSERT() with restart."
+	DEMO_PRINTF("\n Demo commands:"
+			   	"\n  test 1: Failed ASSERT() with restart."
 				"\n  test 2: DFM_TRAP() without restart"
 				"\n  test 3: Hard fault exception"
-				"\n  test 4: buffer overrun, stack corruption"
-			    "\n  load <int>: set interrupt rate (lower value, higher rate)"
+				"\n  test 4: Buffer overrun, stack corruption"
+			    "\n  test 5: Increase interrupt rate to trigger a stopwatch alert."
 			    "\n  print: show all stopwatches"
 			    "\n  poll on: prints stopwatch 0 every 5 s"
 			    "\n  poll off: stops printing every 5 s"
 			    "\n  clear: resets stopwatch 0\n\n");
 }
 
-void demo_command_interface(void)
+void run_demo_command(char* buf)
 {
-	char buf[20];
-
-	extern int get_string(char *buf);
-	get_string(buf);
-
-	if (strncmp(buf, "load", 4) == 0)
-	{
-		char* pch = strtok (buf," ");
-		pch = strtok (NULL, " ");
-
-		if (pch == NULL)
-		{
-			DEMO_PRINTF("\nLoad is: 1/%u\n", demo_interrupt_rate);
-		}
-		else
-		{
-			int tmp = atoi(pch);
-			if (tmp > 0)
-			{
-				demo_interrupt_rate = tmp;
-				DEMO_PRINTF("\nNew load: %d\n", demo_interrupt_rate);
-			}
-		}
-	}
-	else if (strncmp(buf, "print", 5) == 0)
+	if (strncmp(buf, "print", 5) == 0)
 	{
 		DEMO_PRINTF("\n");
 		vDfmStopwatchPrintAll();
@@ -452,9 +440,14 @@ void demo_command_interface(void)
 		testBufferOverrun();
 		demo_isrs_enabled = 1;
 	}
+	else if (strncmp(buf, "test 5", 6) == 0)
+	{
+		DEMO_PRINTF("\nInterrupt probability now 1/4. This should soon trigger a stopwatch alert. Please wait...\n");
+		demo_interrupt_rate = 4;
+	}
 	else
 	{
-		print_commands();
+		print_demo_commands();
 	}
 }
 
@@ -466,4 +459,3 @@ void ethernet_ISR_simulator(void)
 		ethernet_isr_handler();
 	}
 }
-
