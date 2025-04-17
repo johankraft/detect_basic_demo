@@ -1,5 +1,5 @@
 /*
-* Percepio Trace Recorder for Tracealyzer v4.8.2
+* Percepio Trace Recorder for Tracealyzer v4.10.3
 * Copyright 2023 Percepio AB
 * www.percepio.com
 *
@@ -71,19 +71,10 @@ traceResult xTraceStateMachineSetState(TraceStateMachineHandle_t xStateMachineHa
 
 #else
 
-/**
- * @brief Disabled by TRC_CFG_RECORDER_MODE
- */
-#define xTraceStateMachineCreate(__szName, __pxStateMachineHandle) ((void)(__szName), *(__pxStateMachineHandle) = 0, TRC_SUCCESS)
+#define xTraceStateMachineCreate(__szName, __pxStateMachineHandle) ((void)(__szName), (void)(__pxStateMachineHandle), TRC_SUCCESS)
 
-/**
- * @brief Disabled by TRC_CFG_RECORDER_MODE
- */
-#define xTraceStateMachineStateCreate(__xStateMachineHandle, __szName, __pxStateHandle) ((void)(__xStateMachineHandle), (void)(__szName), *(__pxStateHandle) = 0, TRC_SUCCESS)
+#define xTraceStateMachineStateCreate(__xStateMachineHandle, __szName, __pxStateHandle) ((void)(__xStateMachineHandle), (void)(__szName), (void)(__pxStateHandle), TRC_SUCCESS)
 
-/**
- * @brief Disabled by TRC_CFG_RECORDER_MODE
- */
 #define xTraceStateMachineSetState(__xStateMachineHandle, __xStateHandle) ((void)(__xStateMachineHandle), (void)(__xStateHandle), TRC_SUCCESS)
 
 #endif

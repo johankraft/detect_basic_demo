@@ -1,5 +1,5 @@
 /*
-* Percepio Trace Recorder for Tracealyzer v4.8.2
+* Percepio Trace Recorder for Tracealyzer v4.10.3
 * Copyright 2023 Percepio AB
 * www.percepio.com
 *
@@ -50,9 +50,9 @@ traceResult xTraceDependencyRegister(const char* szName, TraceUnsignedBaseType_t
 #else
 
 #ifndef xTraceDependencyRegister
-#define xTraceDependencyRegister(szName, uxDependencyType) ((void)szName, (void)uxDependencyType, TRC_SUCCESS)
+#define xTraceDependencyRegister(szName, uxDependencyType) TRC_COMMA_EXPR_TO_STATEMENT_EXPR_3((void)(szName), (void)(uxDependencyType), TRC_SUCCESS)
 #endif
 
-#endif /* #if (TRC_USE_TRACEALYZER_RECORDER == 1) */
+#endif
 
-#endif /* #ifndef TRC_DEPENDENCY_H */
+#endif

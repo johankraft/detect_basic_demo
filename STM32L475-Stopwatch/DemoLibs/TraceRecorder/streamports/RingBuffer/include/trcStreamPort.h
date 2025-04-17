@@ -1,5 +1,5 @@
 /*
-* Trace Recorder for Tracealyzer v4.8.2
+* Trace Recorder for Tracealyzer v4.10.3
 * Copyright 2023 Percepio AB
 * www.percepio.com
 *
@@ -16,9 +16,9 @@
 
 #if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
 
-#include "trcTypes.h"
-#include "trcStreamPortConfig.h"
-#include "trcRecorder.h"
+#include <trcTypes.h>
+#include <trcStreamPortConfig.h>
+#include <trcRecorder.h>
 
 #ifdef __cplusplus
 extern "C" {

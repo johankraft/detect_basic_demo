@@ -1,5 +1,5 @@
 /*
- * Trace Recorder for Tracealyzer v4.8.2
+ * Trace Recorder for Tracealyzer v4.10.3
  * Copyright 2023 Percepio AB
  * www.percepio.com
  *
@@ -13,6 +13,10 @@
 
 #if (TRC_USE_TRACEALYZER_RECORDER == 1)
 
+#if(TRC_CFG_CPU_CLOCK_HZ == 0)
+#error "TRC_CFG_CPU_CLOCK_HZ needs to be set to the CPU frequency."
+#endif
+	
 #if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
 
 typedef struct TraceKernelPortData
