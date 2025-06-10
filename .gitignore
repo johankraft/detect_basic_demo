@@ -1,2 +1,7 @@
 STM32U585/Debug/
 DebugBuild/
+STM32CubeDemos-B-L475E-IOT01A/Projects/B-L475E-IOT01A/Applications/WiFi/WiFi_HTTP_Server/STM32CubeIDE/WiFi_HTTP_Server.launch
+STM32CubeDemos-B-L475E-IOT01A/Projects/B-L475E-IOT01A/Applications/WiFi/WiFi_HTTP_Server/STM32CubeIDE/.settings/com.st.stm32cube.ide.mcu.sfrview.prefs
+STM32CubeDemos-B-L475E-IOT01A/Projects/B-L475E-IOT01A/Applications/WiFi/WiFi_HTTP_Server/STM32CubeIDE/.settings/language.settings.xml
+STM32CubeDemos-B-L475E-IOT01A/Projects/B-L475E-IOT01A/Applications/WiFi/WiFi_HTTP_Server/STM32CubeIDE/Debug/
+STM32CubeDemos-B-L475E-IOT01A/Projects/B-L475E-IOT01A/Examples/BSP/EWARM/B-L475E-IOT01/BrowseInfo/

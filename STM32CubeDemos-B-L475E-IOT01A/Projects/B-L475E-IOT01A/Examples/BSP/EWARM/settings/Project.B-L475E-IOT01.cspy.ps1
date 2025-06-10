@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "C:\Program Files\IAR Systems\Embedded Workbench 9.2\common\bin\cspybat" -f "C:\src\STM32Cube_FW_L4_V1.18.0\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.general.xcl" --backend -f "C:\src\STM32Cube_FW_L4_V1.18.0\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.driver.xcl" 
+& "C:\Program Files\IAR Systems\Embedded Workbench 9.2\common\bin\cspybat" -f "C:\src\github-repos\detect_basic_demo\STM32CubeDemos-B-L475E-IOT01A\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.general.xcl" --backend -f "C:\src\github-repos\detect_basic_demo\STM32CubeDemos-B-L475E-IOT01A\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.driver.xcl" 
 }
 else
 {
-& "C:\Program Files\IAR Systems\Embedded Workbench 9.2\common\bin\cspybat" -f "C:\src\STM32Cube_FW_L4_V1.18.0\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.general.xcl" --debug_file=$debugfile --backend -f "C:\src\STM32Cube_FW_L4_V1.18.0\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.driver.xcl" 
+& "C:\Program Files\IAR Systems\Embedded Workbench 9.2\common\bin\cspybat" -f "C:\src\github-repos\detect_basic_demo\STM32CubeDemos-B-L475E-IOT01A\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.general.xcl" --debug_file=$debugfile --backend -f "C:\src\github-repos\detect_basic_demo\STM32CubeDemos-B-L475E-IOT01A\Projects\B-L475E-IOT01A\Examples\BSP\EWARM\settings\Project.B-L475E-IOT01.driver.xcl" 
 }
