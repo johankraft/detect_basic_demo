@@ -47,9 +47,17 @@ uintptr_t __stack_chk_guard = 0xDEADBEEF;
 /* Used for snprintf calls */
 char cDfmPrintBuffer[128];
 
+/* Used for __FILE__ macro to extract the filename from the full path. */
 static char* prvGetFileNameFromPath(char* szPath)
 {
-	return strrchr(szPath, '/')+1; /* +1 to skip the last '/' character */
+        char* pos = strrchr(szPath, '/');
+        if (pos != NULL) return pos+1;
+  
+        // No forward slash, look for windows backslash char.
+        pos = strrchr(szPath, '\\');
+        if (pos != NULL) return pos+1;
+          
+	return 0; /* No slash found */
 }
 
 static uint32_t prvCalculateChecksum(char *ptr, size_t maxlen)

@@ -51,9 +51,7 @@ static uint32_t prvPrintDataAsHex(uint8_t* data, int size)
         if ( (i+1) % 20 == 0)
         {
             DFM_PRINT_ALERT_DATA((" ]]\n"));
-            DFM_CFG_UNLOCK_SERIAL();
-            
-            for(volatile int i=0; i<1000000; i++);
+            DFM_CFG_UNLOCK_SERIAL();            
         }
     }
 
@@ -66,82 +64,7 @@ static uint32_t prvPrintDataAsHex(uint8_t* data, int size)
     return checksum;
 }
 
-
-#define ITM_PORT 2
-
-#define itm_write_32(__data) \
-{\
-		while (ITM->PORT[ITM_PORT].u32 == 0) { /* Do nothing */ }	/* Block until room in ITM FIFO - This stream port is always in "blocking mode", since intended for high-speed ITM! */ \
-		ITM->PORT[ITM_PORT].u32 = __data;							/* Write the data */ \
-}
-
-/* This is assumed to execute from within the recorder, with interrupts disabled */
-traceResult prvTraceItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
-{
-	uint32_t* ptr32 = (uint32_t*)ptrData;
-
-	TRC_ASSERT(size % 4 == 0);
-	TRC_ASSERT(ptrBytesWritten != 0);
-
-	*ptrBytesWritten = 0;
-	
-	if ((CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) &&					/* Trace enabled? */ \
-		(ITM->TCR & ITM_TCR_ITMENA_Msk) &&									/* ITM enabled? */ \
-		(ITM->TER & (1UL << (ITM_PORT))))				/* ITM port enabled? */
-	{
-		while (*ptrBytesWritten < (int32_t)size)
-		{
-			itm_write_32(*ptr32);
-			ptr32++;
-			*ptrBytesWritten += 4;
-		}
-	}
-
-	return TRC_SUCCESS;
-}
-
 static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
-{
-	uint32_t datalen;
-        int32_t bytesWritten;
-
-	if (pxCloudPortData == (void*)0)
-	{
-		return DFM_FAIL;
-	}
-
-	if (xEntryHandle == 0)
-	{
-		return DFM_FAIL;
-	}
-
-	if (xDfmEntryGetSize(xEntryHandle, &datalen) == DFM_FAIL)
-	{
-		return DFM_FAIL;
-	}
-
-	if (datalen > 0xFFFF)
-	{
-		return DFM_FAIL;
-	}
-
-        prvTraceItmWrite((uint8_t*)xEntryHandle, datalen, &bytesWritten);
-        
-        printf("DFM wrote %d bytes\n\r", bytesWritten);
-        fflush(stdout);
-        
-        if (bytesWritten != datalen)
-        {
-          return DFM_FAIL;
-        }
-        
-	// (void) prvPrintDataAsHex((uint8_t*)xEntryHandle, datalen);
-
-	return DFM_SUCCESS;
-}
-
-
-static DfmResult_t __prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
 {
 	uint32_t datalen;
 
@@ -177,8 +100,6 @@ static DfmResult_t __prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
 	DFM_CFG_LOCK_SERIAL();
 	DFM_PRINT_SERIAL_DATA(pxCloudPortData->buf);
 	DFM_CFG_UNLOCK_SERIAL();
-
-        //fflush(stdout);          
                 
 	return DFM_SUCCESS;
 }
