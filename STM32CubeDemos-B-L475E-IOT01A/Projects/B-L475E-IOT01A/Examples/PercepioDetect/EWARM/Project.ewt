@@ -1665,7 +1665,7 @@
                 <name>$PROJ_DIR$\..\Src\DFM\dfmCloud.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\DFM\cloudports\Serial\dfmCloudPort.c</name>
+                <name>$PROJ_DIR$\..\Src\DFM\cloudports\ITM\dfmCloudPort.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\DFM\dfmCrashCatcher.c</name>

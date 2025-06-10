@@ -159,9 +159,11 @@ extern void demo_alert(void);
 void vTaskDemoDriver(void *pvParameters)
 {
     (void) pvParameters;
-    printf("DemoDriver running\n");
+    
     for (;;)
     {
+        printf("\nPercepio demo (re)starting\n\n");
+        
         demo_data_logging();
         
         demo_alert();

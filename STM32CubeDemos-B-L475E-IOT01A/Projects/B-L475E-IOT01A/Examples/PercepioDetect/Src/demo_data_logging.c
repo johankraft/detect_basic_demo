@@ -27,7 +27,7 @@ void demo_data_logging(void)
 
   TaskHandle_t hnd = NULL;
   
-  printf("demo_data_logging\n");
+  printf("demo_data_logging - logs accelerometer data (move the board!) \n");
   
   xTaskCreate(
       vTaskAccelerometer,
@@ -38,7 +38,7 @@ void demo_data_logging(void)
       &hnd
   );
   
-  vTaskDelay(3000);
+  vTaskDelay(5000);
   
   vTaskDelete(hnd);
 }

@@ -366,8 +366,8 @@
                     <state>$PROJ_DIR$\..\..\..\..\..\Drivers\BSP\Components\lsm6dsl</state>
                     <state>$PROJ_DIR$\..\Src\CrashCatcher\Core\src</state>
                     <state>$PROJ_DIR$\..\Src\CrashCatcher\include</state>
-                    <state>$PROJ_DIR$\..\Src\DFM\cloudports\Serial\config</state>
-                    <state>$PROJ_DIR$\..\Src\DFM\cloudports\Serial\include</state>
+                    <state>$PROJ_DIR$\..\Src\DFM\cloudports\ITM\config</state>
+                    <state>$PROJ_DIR$\..\Src\DFM\cloudports\ITM\include</state>
                     <state>$PROJ_DIR$\..\Src\DFM\config</state>
                     <state>$PROJ_DIR$\..\Src\DFM\include</state>
                     <state>$PROJ_DIR$\..\Src\DFM\kernelports\FreeRTOS\include</state>
@@ -1330,7 +1330,7 @@
                 <name>$PROJ_DIR$\..\Src\DFM\dfmCloud.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\DFM\cloudports\Serial\dfmCloudPort.c</name>
+                <name>$PROJ_DIR$\..\Src\DFM\cloudports\ITM\dfmCloudPort.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\DFM\dfmCrashCatcher.c</name>
