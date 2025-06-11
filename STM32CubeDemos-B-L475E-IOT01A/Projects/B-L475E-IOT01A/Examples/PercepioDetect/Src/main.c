@@ -1,20 +1,97 @@
-/**
-  ******************************************************************************
-  * @file    BSP/Src/main.c 
-  * @author  MCD Application Team
-  * @brief   Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+
+/******************************************************************************
+ * main.c - Demo of Percepio Tracealyzer and Detect on STM32L4 (B-L475-IOT01)
+ * with IAR Embedded Workbench v9.6 or later.
+ *
+ * This demo is structured into small examples of features and use-cases, with
+ * one .c file for each example.
+ * 
+ * Percepio Tracealyzer (https://percepio.com/tracealyzer)
+ * 
+ * Tracealyzer is an advanced trace viewer that displays event traces from the
+ * TraceRecorder library. This captures RTOS kernel events like
+ * thread scheduling, API calls and also supports user-defined
+ * logging with "user events". In this demo, it is configured to store FreeRTOS
+ * events to a circular RAM buffer that can be dumped by the debugger. This is
+ * achived by using the RingBuffer streamport module. Other streamport modules
+ * allows for continuous trace streaming with IAR and other development tools. 
+ * 
+ * With IAR Embedded Workbench, you can save such RingBuffer snapshots using the
+ * macro file "save_trace_buffer.mac". This is already included in this demo. 
+ * 
+ * To add this in other IAR projects, follow these steps:
+ *
+ *  1. Open Project -> Options -> Debugger -> Setup -> Setup macros. 
+ *     Enable the "Setup macro(s) option and select save_trace_buffer.mac.
+ *
+ *  2. In the debug session, select View -> Macros -> Debugger Macros. Find 
+ *    "save_trace_buffer", right-click and select “Add to Quicklaunch window”. 
+ *
+ *  3. In the Quicklaunch window, double-click on the “refresh” icon to save the trace.
+ *
+ *  4. Locate the resulting file trace.hex and open this in Tracealyzer.
+ *     
+ *     Note that the file will be overwritten each time you run the macro, 
+ *     unless you manually save a copy. Tracealyzer detects when the file is 
+ *     updated and will ask if to reload the trace file.
+ *
+ *
+ * Percepio Detect (https://percepio.com/detect)
+ *
+ * Detect is a team solution for collaborative debugging of crashes and anomalies
+ * during continuous integration testing and in the field. Detect provides automated 
+ * monitoring, detection and reporting of issues, with integrated post-mortem
+ * debugging support by Tracealyzer (using TraceRecorder) and GDB.
+ * 
+ * This demo project includes the target-side library of Percepio Detect, DFM.
+ * DFM provides an API for sending "alerts" to the Detect server on errors and
+ * other anomalies. This does not require direct connectivity from the device to
+ * the Detect server as the DFM data can be logged to a file and processed on a
+ * host computer.
+ *
+ * The "alerts" provided by DFM are machine-readable error reports, containing
+ * metadata about the issue and debug data captured at the error. This includes
+ * a small core dump with the function call stack, as well as a TraceRecorder
+ * trace providing the most recent events. 
+ * 
+ * Viewer tools such as Tracealyzer and a core dump viewer are integrated in the
+ * Detect client and launched when clicking on links in the Detect dashboard.
+ * 
+ * The output interface of DFM is defined by dfmCloudPort.c. In this case it is
+ * using ITM over SWO , which is logged to a file by IAR Embedded Workbench.
+ * 
+ * How to run the Detect Demo with IAR Embedded Workbench:
+ * 
+ * 1. Start a debug session and open SWO Configuration.
+ * 
+ * 2. Under ITM Stimulus Ports:
+ *     - Enabled Ports: Make sure Port 2 is enabled (third from the right)
+ *     - To Log File: Select port 2 (only) and set the output file (ITM.bin).
+ *
+ * 3. Under Clock Setup, review the SWO speed setting. If using an STLINK v2
+ *    onboard debugger, it is recommended to limit the SWO clock to 500 KHz to
+ *    avoid risk of data errors in the SWO transmission. If using an IAR i-jet
+ *    it should be safe to use a much higher SWO clock.
+ *
+ * 4. Run the application from the IAR debugger and view the Terminal I/O window
+ *    until you see notices of alerts. You should now have DFM data in your ITM
+ *    log file.
+ *
+ * 5. Process the ITM log file using the script bin2alerts.py. This is 
+ *    found under "percepio-receiver" in the Percepio Detect folder.
+ *
+ *      Example:
+ *      python bin2alerts.py path/to/ITM.bin -d MyDeviceName -f path/to/alert-files
+ *
+ *    This will create alert files (often several per alert) for the Percepio
+ *    Detect server. Note that the final argument (-f) should match the server's
+ *    alert folder, configured in the server start script.
+ *  
+ *    To see all details in the DFM data, add the -v (verbose) flag. This can
+ *    be useful for troubleshooting but is normally not needed.
+ *
+ *****************************************************************************/
+
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -55,42 +132,15 @@ static void SystemClock_Config(void);
 
 void vTaskDemoDriver(void *pvParameters);
 
-/* Private functions ---------------------------------------------------------*/
 
-
-/* Note: For ITM logging to file on STLINK v2, reduce SWO speed to 500 KHz to
-  avoid issues. The default 2000 KHz does not seem reliable. */
-
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
 int main(void)
 {
 
-  /* STM32L4xx HAL library initialization:
-       - Configure the Flash prefetch, Flash preread and Buffer caches
-       - Systick timer is configured by default as source of time base, but user 
-             can eventually implement his proper time base source (a general purpose 
-             timer for example or other time source), keeping in mind that Time base 
-             duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
-             handled in milliseconds basis.
-       - Low Level Initialization
-     */
   HAL_Init();
-
-  /* Configure the System clock to have a frequency of 80 MHz */
   SystemClock_Config();
-
-
-  /* Configure the User LED */
   BSP_LED_Init(LED2); 
-  
-  /* Configure the User Button in GPIO Mode */
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
   
-  /* Initialize all configured peripherals */
   hDiscoUart.Instance = DISCOVERY_COM1; 
   hDiscoUart.Init.BaudRate = 115200;
   hDiscoUart.Init.WordLength = UART_WORDLENGTH_8B;
@@ -136,13 +186,15 @@ int main(void)
       NULL                // Task handle
   );
     
-  printf("Starting FreeRTOS\n");
+  printf("Starting FreeRTOS\n");  
   vTaskStartScheduler();
   
-  /* Infinite loop */
+  /* Should not get here*/
   while (1)
   {
-    /*QSPI_demo();
+    /* Original ST demos...
+
+    QSPI_demo();
     QSPI_MemoryMapped_demo();    
     Temperature_Test();
     Humidity_Test();
@@ -155,24 +207,26 @@ int main(void)
 
 extern void demo_data_logging(void);
 extern void demo_alert(void);
+extern void demo_crash(void);
 
+// The demo task, calling the indiviual demos one at a time.
 void vTaskDemoDriver(void *pvParameters)
 {
     (void) pvParameters;
     
+    printf("\nPercepio demo starting up\n\n");
+    
     for (;;)
     {
-        printf("\nPercepio demo (re)starting\n\n");
-        
         demo_data_logging();
         
         demo_alert();
+        
+        demo_crash(); // Restarts the board, so must be last.
               
         vTaskDelay(pdMS_TO_TICKS(1000));  // delay 1 second      
     }
 }
-
-
 
 
 static void SystemClock_Config(void)

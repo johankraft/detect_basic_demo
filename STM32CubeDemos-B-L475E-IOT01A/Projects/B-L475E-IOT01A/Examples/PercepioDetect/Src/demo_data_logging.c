@@ -3,6 +3,25 @@
 #include "task.h"
 #include "trcRecorder.h"
 
+/******************************************************************************
+ * demo_data_logging.c
+ *
+ * Demonstrates the use of TraceRecorder "user events" for custom data logging. 
+ * The data is included in the trace data for Percepio Tracealyzer, that displays
+ * it at events and plots.
+ *
+ * The demo application reads the accelerometer on the STMicro B-L475-IOT01
+ * board and logs the data using the xTracePrintF function of the TraceRecorder
+ * library. See TraceRecorder/include/trcPrint.h for more details. 
+ *
+ * See also https://percepio.com/understanding-your-application-with-user-events.
+ *
+ * This can be used both with Tracealyzer as a stand-alone tool, and together
+ * with Percepio Detect for systematic observability on errors and anomalies.
+ * 
+ * Learn more in main.c and at https://percepio.com/tracealyzer.
+ *****************************************************************************/
+
 void vTaskAccelerometer(void *pvParameters)
 {
     (void) pvParameters;
@@ -27,7 +46,7 @@ void demo_data_logging(void)
 
   TaskHandle_t hnd = NULL;
   
-  printf("demo_data_logging - logs accelerometer data (move the board!) \n");
+  printf("\ndemo_data_logging - logs accelerometer data (move the board!) \n");
   
   xTaskCreate(
       vTaskAccelerometer,

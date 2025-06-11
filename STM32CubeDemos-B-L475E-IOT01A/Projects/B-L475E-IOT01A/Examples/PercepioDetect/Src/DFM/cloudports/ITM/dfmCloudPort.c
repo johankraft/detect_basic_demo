@@ -76,6 +76,7 @@ static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
 		return DFM_FAIL;
 	}
 
+        // Write the DFM data in raw binary format to the ITM port.
         prvItmWrite((uint8_t*)xEntryHandle, datalen, &bytesWritten);
         
         snprintf(pxCloudPortData->buf, sizeof(pxCloudPortData->buf), "DFM sent alert data (%d bytes).\n\r", bytesWritten);
