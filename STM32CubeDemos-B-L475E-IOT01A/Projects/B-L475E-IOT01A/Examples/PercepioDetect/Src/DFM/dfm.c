@@ -131,10 +131,14 @@ DfmResult_t xDfmInitialize(DfmUserCallback_t xGetUniqueSessionID, DfmUserCallbac
 	}
 #endif
 
+        (void)xDfmTaskMonitorInit();
+        
 	pxDfmData->ulDfmInitialized = 1;
 
 	(void)xDfmSessionEnable(0); /* Try to enable, but don't override if disabled */
 
+        
+        
 	return DFM_SUCCESS;
 }
 

@@ -33,6 +33,8 @@ dfmTrapInfo_t dfmTrapInfo = {-1, NULL, NULL, -1, 0};
 static TraceStringHandle_t TzUserEventChannel = NULL;
 #endif
 
+uintptr_t __stack_chk_guard = 0xDEADBEEF;
+
 static uint8_t* ucBufferPos;
 static uint8_t ucDataBuffer[CRASH_DUMP_BUFFER_SIZE] __attribute__ ((aligned (8)));
 
@@ -40,9 +42,6 @@ static void dumpHalfWords(const uint16_t* pMemory, size_t elementCount);
 static void dumpWords(const uint32_t* pMemory, size_t elementCount);
 
 uint32_t stackPointer = 0;
-
-uintptr_t __stack_chk_guard = 0xDEADBEEF;
-
 
 /* Used for snprintf calls */
 char cDfmPrintBuffer[128];
@@ -60,7 +59,7 @@ static char* prvGetFileNameFromPath(char* szPath)
 	return 0; /* No slash found */
 }
 
-static uint32_t prvCalculateChecksum(char *ptr, size_t maxlen)
+uint32_t prvCalculateChecksum(char *ptr, size_t maxlen)
 {
 	uint32_t chksum = 0;
 	size_t i = 0;
@@ -143,8 +142,12 @@ void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
 	}
 	xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
 
-        // No need to pause tracing when in a fault handler, since no interrupts here.
-	
+    /* 
+     * It should not be any need to pause tracing here, since in a hard-fault
+     * handler (no interrupts possible). But to be certain the trace buffer
+     * is not updated during the transmission, we stop tracing here.
+     */
+     xTraceDisable();
 	#endif
 
 	DFM_DEBUG_PRINT("\n DFM Alert: ");
@@ -201,7 +204,8 @@ static void prvAddTracePayload(void)
 {
 	void* pvBuffer = (void*)0;
 	uint32_t ulBufferSize = 0;	
-        // No need to pause tracing when in a fault handler, since no interrupts here.
+    
+    // Note that tracing is already disabled at this point.
 	xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
 	xDfmAlertAddPayload(xAlertHandle, pvBuffer, ulBufferSize, "dfm_trace.psfs");
 }
@@ -324,8 +328,11 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void)
 		{
 			CRASH_FINALIZE();
 		}
-		
-                // If resuming execution, the tracing remains active across the fault handler, since no interrupts may occur.
+		else
+		{
+			// Not restarting, so start tracing again.
+			xTraceEnable(TRC_START);
+		}
                 
 		dfmTrapInfo.alertType = -1;
 		dfmTrapInfo.message = NULL;
@@ -350,6 +357,7 @@ void __stack_chk_fail(void)
 	DFM_TRAP(DFM_TYPE_STACK_CHK_FAILED, "Stack corruption detected", 1);
 	#endif
         
+        // Declared "noreturn" when using IAR, so don't return... DFM_TRAP will restart before this point.
         while(1);
 }
 

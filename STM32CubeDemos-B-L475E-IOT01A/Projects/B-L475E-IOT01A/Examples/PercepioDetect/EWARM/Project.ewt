@@ -1599,6 +1599,9 @@
                 <name>$PROJ_DIR$\..\Src\demo_data_logging.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Src\demo_taskmonitor.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Src\main.c</name>
             </file>
             <file>
@@ -1694,6 +1697,9 @@
             <file>
                 <name>$PROJ_DIR$\..\Src\DFM\storageports\Dummy\dfmStoragePort.c</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\DFM\dfmTaskMonitor.c</name>
+            </file>
         </group>
         <group>
             <name>TraceRecorder</name>
@@ -1704,9 +1710,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Src\TraceRecorder\config\trcKernelPortConfig.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Src\TraceRecorder\config\trcStreamingConfig.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Src\TraceRecorder\streamports\RingBuffer\config\trcStreamPortConfig.h</name>
@@ -1770,9 +1773,6 @@
                 <name>$PROJ_DIR$\..\Src\TraceRecorder\trcRunnable.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\TraceRecorder\trcSnapshotRecorder.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Src\TraceRecorder\trcStackMonitor.c</name>
             </file>
             <file>
@@ -1792,6 +1792,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\TraceRecorder\trcTask.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\TraceRecorder\trcTaskMonitor.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\TraceRecorder\trcTimestamp.c</name>

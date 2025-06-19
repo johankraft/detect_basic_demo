@@ -154,9 +154,6 @@ int main(void)
 
   BSP_COM_Init(COM1, &hDiscoUart);
   
-  int32_t bytesWritten;
-  extern traceResult prvTraceItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten);
-    
   printf("Initializing TraceRecorder: ");
   if (xTraceEnable(TRC_START) == TRC_FAIL)
   {
@@ -182,7 +179,7 @@ int main(void)
       "DemoDriver",            
       configMINIMAL_STACK_SIZE*4,
       NULL,               // Parameter
-      tskIDLE_PRIORITY + 1,
+      tskIDLE_PRIORITY,
       NULL                // Task handle
   );
     
@@ -208,6 +205,7 @@ int main(void)
 extern void demo_data_logging(void);
 extern void demo_alert(void);
 extern void demo_crash(void);
+extern void demo_taskmonitor(void);
 
 // The demo task, calling the indiviual demos one at a time.
 void vTaskDemoDriver(void *pvParameters)
@@ -221,6 +219,8 @@ void vTaskDemoDriver(void *pvParameters)
         demo_data_logging();
         
         demo_alert();
+          
+        demo_taskmonitor();
         
         demo_crash(); // Restarts the board, so must be last.
               

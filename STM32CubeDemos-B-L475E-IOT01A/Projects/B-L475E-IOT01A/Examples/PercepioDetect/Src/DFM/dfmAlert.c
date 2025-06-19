@@ -12,6 +12,10 @@
 
 #if ((DFM_CFG_ENABLED) >= 1)
 
+#ifndef DFM_CFG_AFTER_ALERT_SEND
+#define DFM_CFG_AFTER_ALERT_SEND(pxAlert)
+#endif
+
 static DfmResult_t prvDfmAlertInitialize(DfmAlertHandle_t xAlertHandle, uint8_t ucDfmVersion, uint32_t ulProduct, const char* szFirmwareVersion);
 static uint32_t prvDfmAlertCalculateChecksum(uint8_t* pxData, uint32_t ulSize);
 static void prvDfmAlertReset(DfmAlert_t* pxAlert);
@@ -535,8 +539,11 @@ DfmResult_t xDfmAlertEndCustom(DfmAlertHandle_t xAlertHandle, uint32_t ulEndType
 		/* Try to send */
 		if (prvDfmProcessAlert(prvSendAlert, prvSendPayloadChunk) == DFM_SUCCESS)
 		{
+                        /* Hook for doing stuff after the full alert has been sent. */
+                        DFM_CFG_AFTER_ALERT_SEND(pxAlert);
+                  
 			prvDfmAlertReset(pxAlert);
-
+                        
 			return DFM_SUCCESS;
 		}
 	}

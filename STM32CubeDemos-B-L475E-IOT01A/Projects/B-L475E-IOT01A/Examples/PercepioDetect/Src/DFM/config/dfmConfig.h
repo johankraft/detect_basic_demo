@@ -55,6 +55,8 @@ extern void vMainUARTPrintString( char * pcString );
 /* The maximum number of stopwatches (slots) */
 #define DFM_CFG_MAX_STOPWATCHES 4
 
+extern void vDfmCloudPortFlushWithDummyData(void);
+#define DFM_CFG_AFTER_ALERT_SEND(pxAlert) vDfmCloudPortFlushWithDummyData();
 
 /**
  * @brief The maximum size of a "chunk" that will be stored or sent.

@@ -129,7 +129,7 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelete			1
 #define INCLUDE_vTaskCleanUpResources	        0
 #define INCLUDE_vTaskSuspend			1
-#define INCLUDE_vTaskDelayUntil			0
+#define INCLUDE_vTaskDelayUntil			1
 #define INCLUDE_vTaskDelay			1
 #define INCLUDE_xTaskGetSchedulerState          1
 
@@ -185,6 +185,10 @@ standard names. */
 /* IMPORTANT: This define MUST be commented when used with STM32Cube firmware, 
               to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
 /* #define xPortSysTickHandler SysTick_Handler */
+
+
+// Needed for TaskMonitor feature in DFM and TraceRecorder
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
 
 #ifndef __IASMARM__
      #include "trcRecorder.h"    

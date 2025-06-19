@@ -1,6 +1,6 @@
 /*
- * Trace Recorder for Tracealyzer v4.10.3
- * Copyright 2023 Percepio AB
+ * Trace Recorder for Tracealyzer v989.878.767
+ * Copyright 2025 Percepio AB
  * www.percepio.com
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -13,8 +13,6 @@
 #include <xscope.h>
 
 #if (TRC_USE_TRACEALYZER_RECORDER == 1)
-
-#if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
 
 typedef struct TraceStreamPortXS {
 #if (TRC_USE_INTERNAL_BUFFER == 1)
@@ -95,7 +93,5 @@ traceResult xTraceStreamPortReadData(void* pvData, uint32_t uiSize, int32_t* piB
 {
 	return TRC_SUCCESS;
 }
-
-#endif /* (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING) */
 
 #endif /* (TRC_USE_TRACEALYZER_RECORDER == 1) */

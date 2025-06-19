@@ -246,6 +246,21 @@ DfmResult_t xDfmSessionSetSessionIdStrategy(DfmSessionIdStrategy_t xStrategy);
  */
 DfmResult_t xDfmSessionGetSessionIdStrategy(DfmSessionIdStrategy_t* pxStrategy);
 
+/**
+ * @brief Gets number of alerts generated in the current session (since startup).
+ *
+ * @retval Number of alerts, or 0 if DFM is not yet initialized.
+ */
+
+uint32_t xDfmSessionGetAlertCount(void);
+
+/**
+ * @brief Gets number of new alerts generated since the last call of xDfmSessionGetNewAlerts.
+ *
+ * @retval Number of new alerts, or 0 if DFM is not yet initialized.
+ */
+uint32_t xDfmSessionGetNewAlerts(void);
+
 /** @} */
 
 #else
@@ -271,6 +286,9 @@ DfmResult_t xDfmSessionGetSessionIdStrategy(DfmSessionIdStrategy_t* pxStrategy);
 #define xDfmSessionGetSessionIdStrategy(pxStrategy) (DFM_FAIL)
 #define xDfmSessionSetDeviceNameStrategy(xStrategy) (DFM_FAIL)
 #define xDfmSessionGetDeviceNameStrategy(pxStrategy) (DFM_FAIL)
+#define xDfmSessionGetAlertCount() (0)
+#define xDfmSessionGetNewAlerts() (0)
+
 
 #endif
 

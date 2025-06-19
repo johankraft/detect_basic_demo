@@ -95,7 +95,7 @@ static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
 	(void) prvPrintDataAsHex((uint8_t*)xEntryHandle, datalen);
 
     // Checksum not provided (0) since not updated for the new Receiver script (uses a different checksum algorithm). If 0, checksum is ignore.
-	snprintf(pxCloudPortData->buf, sizeof(pxCloudPortData->buf), "[[ DevAlert Data Ended. Checksum: %d ]]\n\r", (unsigned int)0);
+	snprintf(pxCloudPortData->buf, sizeof(pxCloudPortData->buf), "[[ DevAlert Data Ended. Checksum: %d ]]\n", (unsigned int)0);
 
 	DFM_CFG_LOCK_SERIAL();
 	DFM_PRINT_SERIAL_DATA(pxCloudPortData->buf);
@@ -108,8 +108,6 @@ DfmResult_t xDfmCloudPortInitialize(DfmCloudPortData_t* pxBuffer)
 {
 	pxCloudPortData = pxBuffer;
 
-        xTraceHardwarePortInitCortexM();
-        
 	return DFM_SUCCESS;
 }
 

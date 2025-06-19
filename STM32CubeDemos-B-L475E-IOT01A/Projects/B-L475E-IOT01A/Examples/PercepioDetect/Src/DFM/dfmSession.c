@@ -384,6 +384,45 @@ DfmResult_t xDfmSessionGenerateNewAlertId(void)
 	return DFM_SUCCESS;
 }
 
+uint32_t xDfmSessionGetAlertCount(void)
+{       
+	if (pxDfmSessionData == (void*)0)
+	{
+		return 0;
+	}
+
+	if (pxDfmSessionData->ulInitialized == 0UL)
+	{
+		return 0;
+	}
+        
+        return pxDfmSessionData->ulAlertCounter;
+}
+
+uint32_t _last_alert_count = 0;
+
+uint32_t xDfmSessionGetNewAlerts(void)
+{       
+        uint32_t new_alert_count, count;
+        
+	if (pxDfmSessionData == (void*)0)
+	{
+		return 0;
+	}
+
+	if (pxDfmSessionData->ulInitialized == 0UL)
+	{
+		return 0;
+	}
+        
+        count = xDfmSessionGetAlertCount();        
+        new_alert_count = count - _last_alert_count;        
+        _last_alert_count = count;
+        
+        return new_alert_count;
+}
+
+
 DfmResult_t xDfmSessionGetAlertId(uint32_t* pulAlertId)
 {
 	if (pxDfmSessionData == (void*)0)

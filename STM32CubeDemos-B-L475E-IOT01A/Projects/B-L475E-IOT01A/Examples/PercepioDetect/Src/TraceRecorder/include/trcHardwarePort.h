@@ -1,6 +1,6 @@
 /*
- * Trace Recorder for Tracealyzer v4.10.3
- * Copyright 2023 Percepio AB
+ * Trace Recorder for Tracealyzer v989.878.767
+ * Copyright 2025 Percepio AB
  * www.percepio.com
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -237,18 +237,8 @@ uint32_t uiTraceTimerGetValue(void);
 
 	#include <iodefine.h>
 
-	#if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)	
-		
-		#define TRC_HWTC_TYPE TRC_OS_TIMER_INCR
-		#define TRC_HWTC_COUNT (CMT0.CMCNT)
-		
-	#elif (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_SNAPSHOT)
-		
-		/* Decreasing counters better for Tickless Idle? */
-		#define TRC_HWTC_TYPE TRC_OS_TIMER_DECR
-		#define TRC_HWTC_COUNT (CMT0.CMCOR - CMT0.CMCNT)
-	
-	#endif
+	#define TRC_HWTC_TYPE TRC_OS_TIMER_INCR
+	#define TRC_HWTC_COUNT (CMT0.CMCNT)
 	
 	#define TRC_HWTC_PERIOD (CMT0.CMCOR + 1)
 	#define TRC_HWTC_DIVISOR 1

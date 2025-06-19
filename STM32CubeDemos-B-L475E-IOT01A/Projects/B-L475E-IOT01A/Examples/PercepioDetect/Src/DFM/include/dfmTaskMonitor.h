@@ -40,6 +40,17 @@ extern "C" {
  */
 
 /**
+ * @brief Initializes the DFM Task Monitor so it generate alerts on TaskMonitor
+ * anomalies, i.e. when task has a CPU load outside the expected range.
+ * This is called automatically when DFM is initialized. 
+ * Call xDfmTaskMonitorRegister for each task you want to monitor, then call
+ * xDfmTaskMonitorPoll periodically to perform the actual monitoring.
+ * 
+ * @retval TRC_SUCCESS Success
+ */
+void xDfmTaskMonitorInit(void);
+
+/**
  * @brief Set a callback function to be called when a task's CPU load is outside the accepted range.
  * The function should accept a TraceTaskMonitorCallbackData_t* parameter.
  * The failing task's name and address can be retrieved using the parameter (pxData) with
@@ -94,6 +105,16 @@ extern "C" {
  * @retval TRC_SUCCESS Success
  */
 #define xDfmTaskMonitorPollReset() xTraceTaskMonitorPollReset()
+
+
+/**
+ * @brief Prints the high and low watermark for the CPU load of each monitored task.
+ * 
+ * @retval TRC_SUCCESS Success
+ */
+#define xDfmTaskMonitorPrint() xTraceTaskMonitorPrint()
+
+
 
 /** @} */
 

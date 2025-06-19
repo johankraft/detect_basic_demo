@@ -1,6 +1,6 @@
 /*
- * Trace Recorder for Tracealyzer v4.10.3
- * Copyright 2023 Percepio AB
+ * Trace Recorder for Tracealyzer v989.878.767
+ * Copyright 2025 Percepio AB
  * www.percepio.com
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -25,7 +25,7 @@ extern "C" {
  *****************************************************************************/
 //#error "Trace Recorder: Please include your processor's header file here and remove this line."
 #include "stm32l4xx.h"
-  
+
 /**
  * @def TRC_CFG_HARDWARE_PORT
  * @brief Specify what hardware port to use (i.e., the "timestamping driver").
@@ -140,6 +140,46 @@ extern "C" {
  * Default value is 1.
  */
 #define TRC_CFG_INCLUDE_OSTICK_EVENTS 0
+
+/**
+ * @def TRC_CFG_ENTRY_SLOTS
+ * @brief The maximum number of objects and symbols that can be stored. This includes:
+ * - Task names
+ * - Named ISRs (vTraceSetISRProperties)
+ * - Named kernel objects (vTraceStoreKernelObjectName)
+ * - User event channels (xTraceStringRegister)
+ *
+ * If this value is too small, not all symbol names will be stored and the
+ * trace display will be affected. In that case, there will be warnings
+ * (as User Events) from TzCtrl task, that monitors this.
+ */
+#define TRC_CFG_ENTRY_SLOTS 50
+
+/**
+ * @def TRC_CFG_ENTRY_SYMBOL_MAX_LENGTH
+ * @brief The maximum length of symbol names, including:
+ * - Task names
+ * - Named ISRs (vTraceSetISRProperties)
+ * - Named kernel objects (vTraceStoreKernelObjectName)
+ * - User event channel names (xTraceStringRegister)
+ *
+ * If longer symbol names are used, they will be truncated by the recorder,
+ * which will affect the trace display. In that case, there will be warnings
+ * (as User Events) from TzCtrl task, that monitors this.
+ */
+#define TRC_CFG_ENTRY_SYMBOL_MAX_LENGTH 28
+
+/**
+ * @def TRC_CFG_ENABLE_TASK_MONITOR
+ * @brief Enable task monitoring, which allows TraceRecorder to monitor task execution times.
+ */
+#define TRC_CFG_ENABLE_TASK_MONITOR 1
+
+/**
+ * @def TRC_CFG_TASK_MONITOR_MAX_TASKS
+ * @brief The maximum number of tasks that can be monitored by the task monitor.
+ */
+#define TRC_CFG_TASK_MONITOR_MAX_TASKS 5
 
 /**
  * @def TRC_CFG_ENABLE_STACK_MONITOR

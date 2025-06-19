@@ -173,8 +173,7 @@ void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index)
 
 		(void)xTracePrint(TzUserEventChannel, cDfmPrintBuffer);
 
-		/* Pausing the tracing while outputting the data. Note that xDfmAlertAddPayload doesn't copy the trace data, only the pointer.
-		 * So we should not allow new events to be written to the trace buffer before xDfmAlertEnd (where it is stored) */
+		/* Stopping the tracing while sending the trace data. */
 		(void)xTraceDisable();
 
 		(void)xTraceGetEventBuffer(&pvBuffer, &ulBufferSize);
@@ -194,8 +193,7 @@ void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index)
 			DFM_DEBUG_PRINT("DFM: xDfmAlertEnd failed.\n");
 		}
 
-                // Resuming the tracing
-		(void)xTraceEnable(TRC_START);
+        (void)xTraceEnable(TRC_START);
 
 	}
 }

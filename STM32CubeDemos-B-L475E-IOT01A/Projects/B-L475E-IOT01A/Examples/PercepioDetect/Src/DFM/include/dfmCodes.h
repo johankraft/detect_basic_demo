@@ -17,6 +17,7 @@
 
 /* Alert Types */
 /* The following Alert Types are published and will not change. */
+#define DFM_TYPE_TASKMONITOR_ANOMALY (6) /* CPU load is outside the expected range for one or several tasks. */
 #define DFM_TYPE_STACK_CHK_FAILED (5) /* Stack corruption detected */
 #define DFM_TYPE_STOPWATCH (4) /* Stopwatch alert */
 #define DFM_TYPE_HARDFAULT (3) /* Hard Fault */

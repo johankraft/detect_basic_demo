@@ -34,26 +34,24 @@ The default TX and RX buffers are not used by the trace recorder library, so thi
 - In "USB_OTG_FS Mode and Configuration", make sure "Mode" is set to "Device_Only" 
 - Under "Configuration", open "NVIC Settings" and make sure "USB OTG FS global interrupt" is enabled.
 
-3. Open trcConfig.h and set TRC_CFG_RECORDER_MODE to TRC_RECORDER_MODE_STREAMING.
+3. Copy trcStreamingPort.c and include/trcStreamPort.h into your project.
 
-4. Copy trcStreamingPort.c and include/trcStreamPort.h into your project.
-
-5. Make sure you have "vTraceEnable(TRC_INIT);" in main.c (not TRC_START or so).
+4. Make sure you have "vTraceEnable(TRC_INIT);" in main.c (not TRC_START or so).
 This should be placed after the HW setup but before making any RTOS calls.
 
-6. Plug in a USB cable to the connector labeled "USB OTG" or similar (i.e. for application use).
+5. Plug in a USB cable to the connector labeled "USB OTG" or similar (i.e. for application use).
 
-7. Build the project and start it. Check that your computer finds a new USB device (there should be a notification).
+6. Build the project and start it. Check that your computer finds a new USB device (there should be a notification).
 
-8. Check the number of the new COM port, that should have appeared. This is NOT "STLink Virtual COM port".
+7. Check the number of the new COM port, that should have appeared. This is NOT "STLink Virtual COM port".
 
-9. Start Tracealyzer and open Recording Settings and select Target Connection: SerialPort.
+8. Start Tracealyzer and open Recording Settings and select Target Connection: SerialPort.
 You can also access these settings via File -> Settings -> PSF Streaming Settings.
 
-10. Enter the number of the COM port in the "Device" field. The settings (data
+9. Enter the number of the COM port in the "Device" field. The settings (data
 bits, data rate etc.) are irrelevant for USB serial connections and not used.
 
-11. While the target is running, select Record Streaming Trace in Tracealyzer.
+10. While the target is running, select Record Streaming Trace in Tracealyzer.
 You should now see a live display of the trace, while it is being received.
 Make sure there are no warnings about "Dropped Events" (in that case, see Troubleshooting, below).
 

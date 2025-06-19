@@ -58,7 +58,7 @@ void Pressure_Test(void)
     {
       printf("\n*** This is a new data ***\n\n");
       press_value = BSP_PSENSOR_ReadPressure();
-      printf("PRESSURE is = %.2f mBar \n", press_value);
+      printf("PRESSURE is = %.2f mBar \n", (double)press_value);
       printf("\n*** This is a new data ***\n\n");
       printf("\n*** Type n or N to get a new data ***\n\n"); 
       printf("\n*** Type q or Q to quit Pressure Test ***\n\n");      
@@ -97,7 +97,7 @@ void Humidity_Test(void)
     {
       printf("\n*** This is a new data ***\n\n");
       humidity_value = BSP_HSENSOR_ReadHumidity();
-      printf("HUMIDITY is = %.2f %%\n", humidity_value);
+      printf("HUMIDITY is = %.2f %%\n", (double)humidity_value);
       printf("\n*** This is a new data ***\n\n");
       printf("\n*** Type n or N to get a new data ***\n\n"); 
       printf("\n*** Type q or Q to quit Humidity Test ***\n\n");      
@@ -141,7 +141,7 @@ void Temperature_Test(void)
     {
       printf("\n*** This is a new data ***\n\n");
       temp_value = BSP_TSENSOR_ReadTemp();
-      printf("TEMPERATURE is = %.2f °C\n", temp_value);
+      printf("TEMPERATURE is = %.2f °C\n", (double)temp_value);
       printf("\n*** This is a new data ***\n\n");
       printf("\n*** Type n or N to get a new data ***\n\n"); 
       printf("\n*** Type q or Q to quit Temperature Test ***\n\n");      
@@ -219,9 +219,9 @@ void Gyro_Test(void)
     {
       printf("\n*** This is a new data ***\n\n");
       BSP_GYRO_GetXYZ(pGyroDataXYZ);
-      printf("GYRO_X = %.2f \n", pGyroDataXYZ[0]);
-      printf("GYRO_Y = %.2f \n", pGyroDataXYZ[1]);
-      printf("GYRO_Z = %.2f \n", pGyroDataXYZ[2]);
+      printf("GYRO_X = %.2f \n", (double)pGyroDataXYZ[0]);
+      printf("GYRO_Y = %.2f \n", (double)pGyroDataXYZ[1]);
+      printf("GYRO_Z = %.2f \n", (double)pGyroDataXYZ[2]);
       printf("\n*** This is a new data ***\n\n");
       printf("\n*** Type n or N to get a new data ***\n\n"); 
       printf("\n*** Type q or Q to quit Gyro Test ***\n\n");      

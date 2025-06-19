@@ -1,6 +1,6 @@
 /*
- * Trace Recorder for Tracealyzer v4.10.3
- * Copyright 2023 Percepio AB
+ * Trace Recorder for Tracealyzer v989.878.767
+ * Copyright 2025 Percepio AB
  * www.percepio.com
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -15,8 +15,6 @@
 #include <stdio.h>
 
 #if (TRC_USE_TRACEALYZER_RECORDER == 1)
-
-#if (TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)
 
 TraceStreamPortFile_t* pxStreamPortFile TRC_CFG_RECORDER_DATA_ATTRIBUTE;
 
@@ -92,7 +90,5 @@ traceResult xTraceStreamPortOnTraceEnd(void)
 	
 	return TRC_SUCCESS;
 }
-
-#endif /*(TRC_CFG_RECORDER_MODE == TRC_RECORDER_MODE_STREAMING)*/
 
 #endif /*(TRC_USE_TRACEALYZER_RECORDER == 1)*/
