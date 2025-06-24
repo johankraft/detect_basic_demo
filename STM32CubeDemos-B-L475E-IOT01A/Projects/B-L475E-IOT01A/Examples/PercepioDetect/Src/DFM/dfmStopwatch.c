@@ -20,6 +20,7 @@
 
 dfmStopwatch_t stopwatches[DFM_CFG_MAX_STOPWATCHES];
 int32_t stopwatch_count = 0;
+int32_t stopwatch_enabled = 1; // Monitoring is disabled while saving alerts.
 
 extern char cDfmPrintBuffer[128];
 
@@ -53,8 +54,8 @@ dfmStopwatch_t* xDfmStopwatchCreate(const char* name, uint32_t expected_max)
 		sw->high_watermark = 0;
 		sw->start_time = 0;
 		sw->id = stopwatch_count + 1; /* starts with 1, id 0 denotes invalid/uninitialized. */
-		sw->times_above = 0;
-
+		sw->times_above = 0;                
+                
 		stopwatch_count++;
 	}
 	TRACE_EXIT_CRITICAL_SECTION();
@@ -72,10 +73,10 @@ static volatile uint32_t hwtc_count_simulated = 0;
 
 void vDfmStopwatchBegin(dfmStopwatch_t* sw)
 {
-	if (sw != NULL)
-	{
-		sw->start_time = DFM_CFG_HWTC_COUNT;
-	}
+   if (sw != NULL)
+   {
+       sw->start_time = DFM_CFG_HWTC_COUNT;
+   }
 }
 
 extern void prvAddTracePayload(void);
@@ -85,7 +86,7 @@ void vDfmStopwatchEnd(dfmStopwatch_t* sw)
 	uint32_t end_time = DFM_CFG_HWTC_COUNT;
 
 	if (sw != NULL)
-	{
+	{          
 		/* Overflow in HWTC_COUNT is OK. Say that start_time is 0xFFFFFFFF
 		 * and end_time is 1, then we get (1 - 0xFFFFFFFF) = 2.
 		 * This since 0xFFFFFFFF equals -1 (signed) and 1 - (-1)) = 2 */
@@ -117,7 +118,7 @@ void prvStopwatchPrint(dfmStopwatch_t* sw, char* testresult)
 		{
 			sw->name = "NULL";
 		}
-		printf("%12u, %-15s %10u, %12u, %14u %s\n", (unsigned int)sw->id, sw->name, (unsigned int)sw->start_time, (unsigned int)sw->expected_duration, (unsigned int)sw->high_watermark, testresult);
+		printf("%12u, %-14s %9u %9u %9u %s\n", (unsigned int)sw->id, sw->name, (unsigned int)sw->high_watermark, (unsigned int)sw->expected_duration, (unsigned int)sw->start_time, testresult);
 	}
 	else
 	{
@@ -127,7 +128,7 @@ void prvStopwatchPrint(dfmStopwatch_t* sw, char* testresult)
 
 void prvDfmPrintHeader(void)
 {
-	printf("Stopwatch ID, Name,           Last Start, Expected Max, High Watermark\n");
+    printf("%12s, %-14s %9s %9s %9s\n", "Stopwatch ID", "Name", "High Wm", "Exp Max", "Last Start");
 }
 
 void vDfmStopwatchPrintAll(void)
@@ -138,8 +139,6 @@ void vDfmStopwatchPrintAll(void)
 		if (stopwatches[i].id != 0)
 		{
 			prvStopwatchPrint(&stopwatches[i], "");
-		}else{
-			printf("Index %d not used.\n", i);
 		}
 	}
 }
@@ -193,7 +192,7 @@ void prvDfmStopwatchAlert(char* msg, int high_watermark, int stopwatch_index)
 			DFM_DEBUG_PRINT("DFM: xDfmAlertEnd failed.\n");
 		}
 
-        (void)xTraceEnable(TRC_START);
+                (void)xTraceEnable(TRC_START);
 
 	}
 }

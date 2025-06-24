@@ -35,7 +35,7 @@
  * @brief Strategy to use after crash has been handled
  * Values: CRASH_STRATEGY_RESET() or CRASH_STRATEGY_LOOP()
  */
-#define CRASH_FINALIZE() DFM_DEBUG_PRINT("DFM: Restarting...\n\n\n"); CRASH_STRATEGY_RESET()
+#define CRASH_FINALIZE() DFM_DEBUG_PRINT("DFM: Restarting...\n\n\n"); for (volatile int i = 0; i < 1000000; i++); CRASH_STRATEGY_RESET()
 
 #define CRASH_STACK_CAPTURE_SIZE DFM_CFG_STACKDUMP_SIZE
 

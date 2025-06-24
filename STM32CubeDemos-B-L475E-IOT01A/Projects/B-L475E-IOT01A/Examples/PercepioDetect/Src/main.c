@@ -206,6 +206,7 @@ extern void demo_data_logging(void);
 extern void demo_alert(void);
 extern void demo_crash(void);
 extern void demo_taskmonitor(void);
+extern void demo_stopwatch(void);
 
 // The demo task, calling the indiviual demos one at a time.
 void vTaskDemoDriver(void *pvParameters)
@@ -216,14 +217,17 @@ void vTaskDemoDriver(void *pvParameters)
     
     for (;;)
     {
+      
         demo_data_logging();
         
         demo_alert();
-          
+
+        demo_stopwatch();
+        
         demo_taskmonitor();
         
         demo_crash(); // Restarts the board, so must be last.
-              
+
         vTaskDelay(pdMS_TO_TICKS(1000));  // delay 1 second      
     }
 }
