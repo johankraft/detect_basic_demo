@@ -28,13 +28,6 @@ static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle);
 		ITM->PORT[__port].u32 = __data;    /* Write the data */ \
 }
 
-/* This blocks until there is room in the ITM FIFO (TPIU) */
-#define itm_write_8(__port, __data) \
-{\
-		while (ITM->PORT[__port].u8 == 0) { /* Do nothing */ } \
-		ITM->PORT[__port].u8 = __data;    /* Write the data */ \
-}
-
 void prvItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
 {
 	uint32_t* ptr32 = (uint32_t*)ptrData;
@@ -57,28 +50,17 @@ void prvItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
 	}
 }
 
-void __prvItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
-{
-	uint8_t* ptr8 = (uint8_t*)ptrData;
-
-	*ptrBytesWritten = 0;
-	
-	if ((CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) &&    /* Trace enabled? */ \
-		(ITM->TCR & ITM_TCR_ITMENA_Msk) &&                /* ITM enabled? */ \
-		(ITM->TER & (1UL << (DFM_CFG_ITM_PORT))))                 /* ITM port enabled? */
-	{
-		while (*ptrBytesWritten < (int32_t)size)
-		{
-			itm_write_8(DFM_CFG_ITM_PORT, *ptr8);
-			ptr8++;
-			*ptrBytesWritten = *ptrBytesWritten + 1;
-		}
-	}
-}
-
- uint8_t dummyFlushData[12] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x1E, 0x1F, 0x0C, '\n', '\r'};
+uint8_t dummyFlushData[12] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x1E, 0x1F, 0x0C, '\n', '\r'};
  
-/* When using ITM logging with IAR, this helps flushing the data to the log file after an alert. */
+/* When using ITM logging with IAR, this helps flushing the data to the log file after an alert. 
+   Might not be needed in all cases.
+
+   To use this, add the following in your dfmConfig.h:
+
+   extern void vDfmCloudPortFlushWithDummyData(void);
+   #define DFM_CFG_AFTER_ALERT_SEND(pxAlert) vDfmCloudPortFlushWithDummyData();
+
+*/
 void vDfmCloudPortFlushWithDummyData(void)
 {
    int32_t bytesWritten = 0;
@@ -115,12 +97,7 @@ static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
 
         // Write the DFM data in raw binary format to the ITM port.
         prvItmWrite((uint8_t*)xEntryHandle, datalen, &bytesWritten);
-        
-        //flushWithZeros();
-        
-        //snprintf(pxCloudPortData->buf, sizeof(pxCloudPortData->buf), "DFM sent alert data (%d bytes).\n\r", bytesWritten);
-        //DFM_CFG_PRINT(pxCloudPortData->buf);
-        
+               
         if (bytesWritten != datalen)
         {
           return DFM_FAIL;
