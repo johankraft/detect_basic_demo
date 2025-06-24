@@ -1599,6 +1599,9 @@
                 <name>$PROJ_DIR$\..\Src\demo_data_logging.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Src\demo_kernel_tracing.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Src\demo_stopwatch.c</name>
             </file>
             <file>

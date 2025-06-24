@@ -47,6 +47,16 @@ TraceStringHandle_t demo_log_chn;
 
 void demo_alert(void)
 {   
+   printf("Initializing DFM: ");
+   if (xDfmInitializeForLocalUse() == DFM_FAIL)
+   {
+        printf("FAIL\n");
+   }
+   else
+   {
+      printf("OK\n");
+   }
+
    xTraceStringRegister("Demo Log", &demo_log_chn);
   
    printf("\ndemo_alert.c - DFM alert follows in 2 sec.\n\n");

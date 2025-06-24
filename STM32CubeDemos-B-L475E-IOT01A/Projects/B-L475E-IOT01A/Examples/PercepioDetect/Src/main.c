@@ -154,25 +154,15 @@ int main(void)
 
   BSP_COM_Init(COM1, &hDiscoUart);
   
-  printf("Initializing TraceRecorder: ");
-  if (xTraceEnable(TRC_START) == TRC_FAIL)
-  {
-    printf("FAIL\n");
-  }
-  else
-  {
-    printf("OK\n");
-  }
-  
-  printf("Initializing DFM: ");
-  if (xDfmInitializeForLocalUse() == DFM_FAIL)
-  {
+   printf("Initializing TraceRecorder: ");
+   if (xTraceEnable(TRC_START) == TRC_FAIL)
+   {
       printf("FAIL\n");
-  }
-  else
-  {
-    printf("OK\n");
-  }
+   }
+   else
+   {
+      printf("OK\n");
+   }
   
   xTaskCreate(
       vTaskDemoDriver,             
@@ -202,6 +192,7 @@ int main(void)
   }
 }
 
+extern void demo_kernel_tracing(void);
 extern void demo_data_logging(void);
 extern void demo_alert(void);
 extern void demo_crash(void);
@@ -216,7 +207,10 @@ void vTaskDemoDriver(void *pvParameters)
     printf("\nPercepio demo starting up\n\n");
     
     for (;;)
-    {
+    {     
+        /* Demostrates tracing of a FreeRTOS application with queue and mutex
+           operations including custom names for the queue and mutex objects. */
+        demo_kernel_tracing();
       
         /* Shows how to log data to the TraceRecorder trace using "user events". */
         demo_data_logging();
