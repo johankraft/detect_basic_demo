@@ -9,14 +9,13 @@
 /******************************************************************************
  * demo_stopwatch.c
  *
- * Demonstrates the use of the DFM Stopwatch feature ...
- *
- * See also https://percepio.com/understanding-your-application-with-user-events.
- *
- * This can be used both with Tracealyzer as a stand-alone tool, and together
- * with Percepio Detect for systematic observability on errors and anomalies.
+ * Demonstrates the use of the DFM Stopwatch feature for monitoring software
+ * latencies. Alerts are provided to Percepio Detect if the latency is higher
+ * than expected, together with a trace for debugging purposes. This can be used
+ * not only to analyze execution time variations, but also for multithreading
+ * issues that otherwise might be very hard to debug.
  * 
- * Learn more in main.c and at https://percepio.com/tracealyzer.
+ * See also https://percepio.com/detect.
  *****************************************************************************/
 
 dfmStopwatch_t* stopwatch;
@@ -31,10 +30,6 @@ int waitForEvent(void);
 
 void vComputeTask(void *pvParameters) 
 {
-    TickType_t xLastWakeTime;
-    
-    xLastWakeTime = xTaskGetTickCount();
-    
     while (1)
     {      
         vTaskDelay( pdMS_TO_TICKS(24) );
@@ -45,7 +40,8 @@ void vComputeTask(void *pvParameters)
         // Perform time-consuming processing
         computeSomething();
         
-        // Check the elapsed time, generate alert if over expected maximum.
+        // Check the elapsed time since begin. 
+        // Generates a DFM alert to Percepio Detect if over the expected maximum (set in xDfmStopwatchCreate).
         vDfmStopwatchEnd(stopwatch);
     }
 }
@@ -70,6 +66,7 @@ void demo_stopwatch(void)
     
   printf("\ndemo_stopwatch - detecting latency anomalies.\n");
   
+  // Generates a DFM alert to Percepio Detect if over the expected maximum (specified in clock cycles).
   stopwatch = xDfmStopwatchCreate("ComputeTime", 300000);
     
   xTaskCreate(

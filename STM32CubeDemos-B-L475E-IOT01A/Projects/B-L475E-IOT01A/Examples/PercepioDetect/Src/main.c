@@ -218,14 +218,19 @@ void vTaskDemoDriver(void *pvParameters)
     for (;;)
     {
       
+        /* Shows how to log data to the TraceRecorder trace using "user events". */
         demo_data_logging();
         
+        /* Shows how to report an error as a DFM alert for Percepio Detect */
         demo_alert();
 
+        /* Shows how to monitor response time anomalies using DFM for Percepio Detect */
         demo_stopwatch();
         
+        /* How to monitor CPU load anomalies using DFM for Percepio Detect */
         demo_taskmonitor();
         
+        /* Demonstrates crash debugging (hard fault exception) with Percepio Detect */
         demo_crash(); // Restarts the board, so must be last.
 
         vTaskDelay(pdMS_TO_TICKS(1000));  // delay 1 second      

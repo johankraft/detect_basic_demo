@@ -5,22 +5,25 @@
 #include "dfm.h"
 
 /******************************************************************************
- * demo_data_logging.c
+ * demo_taskmonitor.c
  *
- * Demonstrates the use of TraceRecorder "user events" for custom data logging. 
- * The data is included in the trace data for Percepio Tracealyzer, that displays
- * it at events and plots.
- *
- * The demo application reads the accelerometer on the STMicro B-L475-IOT01
- * board and logs the data using the xTracePrintF function of the TraceRecorder
- * library. See TraceRecorder/include/trcPrint.h for more details. 
- *
- * See also https://percepio.com/understanding-your-application-with-user-events.
- *
- * This can be used both with Tracealyzer as a stand-alone tool, and together
- * with Percepio Detect for systematic observability on errors and anomalies.
+ * Demonstrates the use of the DFM TaskMonitor feature for monitoring the
+ * processor time usage of software threads. This generates DFM alerts to 
+ * Percepio Detect if a thread uses more than, or less than, the typical
+ * processor time. A trace is then included for analysis.
+ * This can be used not only to analyze workload variations, but also for
+ * multithreading issues that otherwise might be very hard to debug.
+ * For example, if your system would become unresponsive because of threads
+ * being blocked or even having a deadlock situation, the TaskMonitor can report
+ * that the tasks have not executed less than normal. Or if a task gets stuck
+ * in a loop, the TaskMonitor can report that it is executing more than usual.
  * 
- * Learn more in main.c and at https://percepio.com/tracealyzer.
+ * The expected range of CPU usage per thread is specified by calling
+ * xDfmTaskMonitorRegister, for example:
+ *
+ *    xDfmTaskMonitorRegister(hndTask2, 2, 98); // Expected range: 2 - 98%.
+ * 
+ * See also https://percepio.com/detect.
  *****************************************************************************/
 
 volatile int task1_spike = 0;
