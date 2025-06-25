@@ -199,7 +199,7 @@ void vTaskDemoDriver(void *pvParameters)
         
         switch(demoToRun)
         {
-            case 6: 
+            case 0: 
               /* Demonstrates tracing of a FreeRTOS application with queue and mutex
                  operations including custom names for the queue and mutex objects. */
               demo_kernel_tracing(); 
@@ -230,7 +230,7 @@ void vTaskDemoDriver(void *pvParameters)
                demo_crash();
                break;
                
-            case 0:       
+            case 6:       
                /* Demonstrates detection of stack corruption with Percepio Detect */
                demo_stack_corruption();
                break;
