@@ -161,10 +161,13 @@ void demo_taskmonitor(void)
   TaskHandle_t hndTask2 = NULL;
   TaskHandle_t hndMon = NULL;
     
-  
+  /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
   
   printf("\ndemo_taskmonitor - detecting CPU load anomalies in threads.\n");
     
+  /* Clears the "new alerts" counter */
+  (void)xDfmSessionGetNewAlerts();
+  
   xTaskCreate(
       vTask1,
       "vTask1",

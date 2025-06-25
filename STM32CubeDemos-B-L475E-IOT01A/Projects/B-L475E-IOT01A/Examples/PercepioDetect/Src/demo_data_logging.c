@@ -46,7 +46,16 @@ void demo_data_logging(void)
 
   TaskHandle_t hnd = NULL;
   
-  printf("\ndemo_data_logging - logs accelerometer data (move the board!) \n");
+  /* Note: The TraceRecorder library must be initialized first (see main.c) */
+  
+  printf("\n\rdemo_data_logging - logs accelerometer data to TraceRecorder.\n\r"
+             "Physically move the board and then halt quickly. When halted, take a snapshot\n\r"
+             "of the trace buffer and open in Percepio Tracealyzer. The sensor data is can be\n\r"
+             "seen as yellow \"User Events\" and is also plotted in the User Event Signal Plot.\n\r\n\r" );
+  
+  /* To learn how to take snapshots from TraceRecorder and see them in Tracealyzer,
+   see https://percepio.com/tracealyzer/gettingstarted/ and scroll down to 
+   "Guides for specific development tools", or consult the Tracealyzer User Manual. */
   
   xTaskCreate(
       vTaskAccelerometer,

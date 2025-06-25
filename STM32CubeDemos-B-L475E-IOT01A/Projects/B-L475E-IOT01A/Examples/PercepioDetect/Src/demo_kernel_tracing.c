@@ -97,6 +97,8 @@ void demo_kernel_tracing(void)
     TaskHandle_t hndTask2 = NULL;
     TaskHandle_t hndTask3 = NULL;
 
+    /* Note: The TraceRecorder library must be initialized first (see main.c) */
+    
     // Create queue
     xQueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
     
@@ -113,7 +115,14 @@ void demo_kernel_tracing(void)
     vTraceSetQueueName(xQueue, "My Queue");
     vTraceSetMutexName(xMutex, "My Mutex");
     
-    printf("\ndemo_kernel_tracing\n");
+    
+    printf("\n\demo_kernel_tracing - Demonstrates RTOS tracing with TraceRecorder.\n\r"
+             "Halt the execution after some second, then take a snapshot\n\r"
+             "of the trace buffer and open in Percepio Tracealyzer.\n\r\n\r" );
+    
+    /* To learn how to take snapshots from TraceRecorder and see them in Tracealyzer,
+       see https://percepio.com/tracealyzer/gettingstarted/ and scroll down to 
+       "Guides for specific development tools", or consult the Tracealyzer User Manual. */
     
     xTaskCreate(
         vTask1,

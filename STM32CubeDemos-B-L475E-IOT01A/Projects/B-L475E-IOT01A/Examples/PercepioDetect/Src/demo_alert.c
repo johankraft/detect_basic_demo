@@ -46,27 +46,28 @@ void functionX(int a, int b)
 TraceStringHandle_t demo_log_chn;
 
 void demo_alert(void)
-{   
-   printf("Initializing DFM: ");
-   if (xDfmInitializeForLocalUse() == DFM_FAIL)
-   {
-        printf("FAIL\n");
-   }
-   else
-   {
-      printf("OK\n");
-   }
+{  
+   /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
+      
+   xTraceStringRegister("Demo Log", &demo_log_chn);  
 
-   xTraceStringRegister("Demo Log", &demo_log_chn);
-  
-   printf("\ndemo_alert.c - DFM alert follows in 2 sec.\n\n");
-   xTracePrint(demo_log_chn, "demo_alert.c - DFM alert follows in 2 sec.");
+   printf("\n\rdemo_alert.c - A bad function argument causes a DFM alert.\n\r\n\r"
+           "The error will be reported to Percepio Detect using the DFM library.\n\r"
+           "When DFM data has been ingested by the Detect receiver, an alert will appear\n\r"
+           "in the dashboard, with a Tracealyzer trace and a core dump providing\n\r"
+           "the function call stack, arguments and local variables.\n\n");
    
    vTaskDelay(2000);
          
    for(volatile int i = 0; i < 100000; i++); // Simulate some processing
+   
+   // Valid function arguments
    functionX(3, 4); 
+   
+   // Invalid arguments, triggering an alert.
    functionX(-1, -3); 
    
+   
+    
 }
   

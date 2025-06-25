@@ -63,6 +63,8 @@ void demo_stopwatch(void)
 
   TaskHandle_t hndTask1 = NULL;
   TaskHandle_t hndTask2 = NULL;
+
+  /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
     
   printf("\ndemo_stopwatch - detecting latency anomalies.\n");
   

@@ -129,9 +129,21 @@ extern UART_HandleTypeDef hDiscoUart;
 
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
+static void InitUART(void);
+static unsigned int selectNextDemo(void);
 
 void vTaskDemoDriver(void *pvParameters);
 
+extern void demo_kernel_tracing(void);
+extern void demo_data_logging(void);
+extern void demo_alert(void);
+extern void demo_crash(void);
+extern void demo_taskmonitor(void);
+extern void demo_stopwatch(void);
+extern void demo_stack_corruption(void);
+
+/* Remembers the next demo to run, even if there is a warm restart */
+volatile __attribute__((section (".noinit"))) unsigned int demo_test_case_next;
 
 int main(void)
 {
@@ -140,29 +152,20 @@ int main(void)
   SystemClock_Config();
   BSP_LED_Init(LED2); 
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-  
-  hDiscoUart.Instance = DISCOVERY_COM1; 
-  hDiscoUart.Init.BaudRate = 115200;
-  hDiscoUart.Init.WordLength = UART_WORDLENGTH_8B;
-  hDiscoUart.Init.StopBits = UART_STOPBITS_1;
-  hDiscoUart.Init.Parity = UART_PARITY_NONE;
-  hDiscoUart.Init.Mode = UART_MODE_TX_RX;
-  hDiscoUart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  hDiscoUart.Init.OverSampling = UART_OVERSAMPLING_16;
-  hDiscoUart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hDiscoUart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-
+  InitUART();
   BSP_COM_Init(COM1, &hDiscoUart);
   
-   printf("Initializing TraceRecorder: ");
-   if (xTraceEnable(TRC_START) == TRC_FAIL)
-   {
-      printf("FAIL\n");
-   }
-   else
-   {
-      printf("OK\n");
-   }
+  printf("Initializing TraceRecorder library.\n\r");
+  if (xTraceEnable(TRC_START) == TRC_FAIL)
+  {
+      printf("\n\r  ERROR: TraceRecorder failed to initialize\n\r");
+  }
+   
+  printf("Initializing DFM library for Percepio Detect.\n\r");
+  if (xDfmInitializeForLocalUse() == DFM_FAIL)
+  {
+      printf("\n\r  ERROR: DFM failed to initialize\n\r");
+  }
   
   xTaskCreate(
       vTaskDemoDriver,             
@@ -176,61 +179,99 @@ int main(void)
   printf("Starting FreeRTOS\n");  
   vTaskStartScheduler();
   
-  /* Should not get here*/
   while (1)
-  {
-    /* Original ST demos...
-
-    QSPI_demo();
-    QSPI_MemoryMapped_demo();    
-    Temperature_Test();
-    Humidity_Test();
-    Pressure_Test();
-    Magneto_Test();
-    Gyro_Test();
-    Accelero_Test();*/
+  {   
+    /* Should not get here*/
   }
 }
 
-extern void demo_kernel_tracing(void);
-extern void demo_data_logging(void);
-extern void demo_alert(void);
-extern void demo_crash(void);
-extern void demo_taskmonitor(void);
-extern void demo_stopwatch(void);
-
-// The demo task, calling the indiviual demos one at a time.
 void vTaskDemoDriver(void *pvParameters)
 {
     (void) pvParameters;
     
-    printf("\nPercepio demo starting up\n\n");
+    printf("\n\rPercepio demo starting up\n\r\n\r");
     
     for (;;)
     {     
-        /* Demostrates tracing of a FreeRTOS application with queue and mutex
-           operations including custom names for the queue and mutex objects. */
-        demo_kernel_tracing();
-      
-        /* Shows how to log data to the TraceRecorder trace using "user events". */
-        demo_data_logging();
+        unsigned int demoToRun = selectNextDemo();
+        printf("\n\r----------------------------------------\n\r");
+        printf("\n\rRunning demo example %d\n\r", demoToRun);
         
-        /* Shows how to report an error as a DFM alert for Percepio Detect */
-        demo_alert();
+        switch(demoToRun)
+        {
+            case 6: 
+              /* Demonstrates tracing of a FreeRTOS application with queue and mutex
+                 operations including custom names for the queue and mutex objects. */
+              demo_kernel_tracing(); 
+              break;
+              
+            case 1: 
+              /* Shows how to log data to the TraceRecorder trace using "user events". */
+              demo_data_logging(); 
+              break;
+            
+            case 2:
+              /* Shows how to report an error as a DFM alert for Percepio Detect */  
+              demo_alert();
+              break;
 
-        /* Shows how to monitor response time anomalies using DFM for Percepio Detect */
-        demo_stopwatch();
+            case 3:
+               /* Shows how to monitor response time anomalies using DFM for Percepio Detect */
+               demo_stopwatch();
+               break;
+            
+            case 4:        
+               /* How to monitor CPU load anomalies using DFM for Percepio Detect */
+               demo_taskmonitor();
+               break;
+               
+            case 5:       
+               /* Demonstrates crash debugging (hard fault exception) with Percepio Detect */
+               demo_crash();
+               break;
+               
+            case 0:       
+               /* Demonstrates detection of stack corruption with Percepio Detect */
+               demo_stack_corruption();
+               break;
+        }
         
-        /* How to monitor CPU load anomalies using DFM for Percepio Detect */
-        demo_taskmonitor();
-        
-        /* Demonstrates crash debugging (hard fault exception) with Percepio Detect */
-        demo_crash(); // Restarts the board, so must be last.
-
         vTaskDelay(pdMS_TO_TICKS(1000));  // delay 1 second      
     }
 }
 
+
+static unsigned int selectNextDemo(void)
+{
+    unsigned int ret;
+    
+    if (demo_test_case_next > 7) // Uninitialized after cold start, possibly junk value.
+    {
+        ret = 0;
+        demo_test_case_next = 1; 
+    }
+    else
+    {
+        ret = demo_test_case_next;
+        demo_test_case_next = (demo_test_case_next + 1) % 7;
+    }
+    return ret;
+}    
+
+
+static void InitUART(void)
+{
+  hDiscoUart.Instance = DISCOVERY_COM1; 
+  hDiscoUart.Init.BaudRate = 115200;
+  hDiscoUart.Init.WordLength = UART_WORDLENGTH_8B;
+  hDiscoUart.Init.StopBits = UART_STOPBITS_1;
+  hDiscoUart.Init.Parity = UART_PARITY_NONE;
+  hDiscoUart.Init.Mode = UART_MODE_TX_RX;
+  hDiscoUart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hDiscoUart.Init.OverSampling = UART_OVERSAMPLING_16;
+  hDiscoUart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hDiscoUart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+}
 
 static void SystemClock_Config(void)
 {

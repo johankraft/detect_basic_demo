@@ -73,17 +73,23 @@ static void enable_divide_by_zero_exception(void)
 
 extern TraceStringHandle_t demo_log_chn;
 
+
 void demo_crash(void)
 { 
     int result;
-     
+    
+    /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
+    
     enable_divide_by_zero_exception();
     
-    printf("\ndemo_crash.c - DFM alert follows in 2 sec.\n\n");
-    xTracePrint(demo_log_chn, "demo_crash.c - DFM alert follows in 2 sec.");
-   
-    vTaskDelay(2000);
+    printf("\n\rdemo_crash.c - A bug will cause a UsageFault exception in the second function call.\n\r\n\r"
+           "The error will be reported to Percepio Detect using the DFM library.\n\r"
+           "When DFM data has been ingested by the Detect receiver, an alert will appear\n\r"
+           "in the dashboard, with a Tracealyzer trace and a core dump providing\n\r"
+           "the function call stack, arguments and local variables.\n\r");
     
+    vTaskDelay(2000);
+     
     printf("Reading and transforming SENSOR1 value...\n");
     result = transform_sensor_value(read_sensor(SENSOR1), configs[SENSOR1].scale_factor, configs[SENSOR1].offset);
     printf("Value is: %d\n", result);
@@ -91,5 +97,7 @@ void demo_crash(void)
     printf("Reading and transforming SENSOR2 value... (causes divide-by-zero exception!)\n");
     result = transform_sensor_value(read_sensor(SENSOR2), configs[SENSOR2].scale_factor, configs[SENSOR2].offset);
     printf("Value is: %d\n", result);
+    
+    
 }
 
