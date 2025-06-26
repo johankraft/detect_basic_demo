@@ -17,7 +17,7 @@
  * also supports IAR.
  *
  * The fault is reported as a DFM alert, i.e. a machine-readable error report
- * that contain metadata about the* issue and debug data captured at the error,
+ * that contain metadata about the issue and debug data captured at the error,
  * including a small core dump with the call-stack trace, as well as a
  * TraceRecorder trace providing the most recent events. 
  *
@@ -71,14 +71,14 @@ static void enable_divide_by_zero_exception(void)
     SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk;   // Enable UsageFault exception
 }
 
-extern TraceStringHandle_t demo_log_chn;
+static TraceStringHandle_t demo_log_chn;
 
 
 void demo_crash(void)
 { 
     int result;
     
-    /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
+    /* Note: The DFM library is initialized in main.c. */
     
     enable_divide_by_zero_exception();
     
@@ -88,16 +88,23 @@ void demo_crash(void)
            "in the dashboard, with a Tracealyzer trace and a core dump providing\n\r"
            "the function call stack, arguments and local variables.\n\r");
     
-    vTaskDelay(2000);
-     
-    printf("Reading and transforming SENSOR1 value...\n");
+    vTaskDelay(2500);
+    
+    /* Resets and start the TraceRecorder tracing. */
+    xTraceEnable(TRC_START);
+    
+    xTraceStringRegister("Demo Log", &demo_log_chn);
+    
+    vTaskDelay(1);
+    
+    xTracePrint(demo_log_chn, "Reading and transforming SENSOR1 value");
     result = transform_sensor_value(read_sensor(SENSOR1), configs[SENSOR1].scale_factor, configs[SENSOR1].offset);
-    printf("Value is: %d\n", result);
-        
-    printf("Reading and transforming SENSOR2 value... (causes divide-by-zero exception!)\n");
-    result = transform_sensor_value(read_sensor(SENSOR2), configs[SENSOR2].scale_factor, configs[SENSOR2].offset);
-    printf("Value is: %d\n", result);
+    xTracePrintF(demo_log_chn, "Returned: %d", result);
     
+    xTracePrint(demo_log_chn, "Reading and transforming SENSOR2 value");
+    result = transform_sensor_value(read_sensor(SENSOR2), configs[SENSOR2].scale_factor, configs[SENSOR2].offset); 
+    xTracePrintF(demo_log_chn, "Returned: %d", result); // Won't be reached due to exception causing a restart
     
+    xTraceDisable(); 
 }
 

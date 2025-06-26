@@ -14,8 +14,14 @@
  * than expected, together with a trace for debugging purposes. This can be used
  * not only to analyze execution time variations, but also for multithreading
  * issues that otherwise might be very hard to debug.
+ *
+ * DFM alerts are machine-readable error reports, containing metadata about the
+ * issue and debug data captured at the error, including a small core dump
+ * with the call-stack trace, as well as a TraceRecorder trace providing the
+ * most recent events. Viewer tools are integrated in the Detect client and
+ * launched when clicking on the "payload" links in the Detect dashboard.
  * 
- * See also https://percepio.com/detect.
+ * Learn more in main.c and at https://percepio.com/detect.
  *****************************************************************************/
 
 dfmStopwatch_t* stopwatch;
@@ -64,9 +70,17 @@ void demo_stopwatch(void)
   TaskHandle_t hndTask1 = NULL;
   TaskHandle_t hndTask2 = NULL;
 
-  /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
+  /* Note: The DFM library is initialized in main.c. */
     
-  printf("\ndemo_stopwatch - detecting latency anomalies.\n");
+  printf("\n\rdemo_stopwatch - demonstrates the use of the DFM Stopwatch feature"
+          "for monitoring software latencies. Alerts are generated for Percepio\n\r"
+           "Detect if the monitored latency is higher than expected, and exceeding\n\r"
+           "the earlier high watermark.\n\r\n\r");
+  
+  vTaskDelay(2500);
+  
+  /* Resets and start the TraceRecorder tracing. */
+  xTraceEnable(TRC_START);
   
   // Generates a DFM alert to Percepio Detect if over the expected maximum (specified in clock cycles).
   stopwatch = xDfmStopwatchCreate("ComputeTime", 300000);
@@ -98,6 +112,7 @@ void demo_stopwatch(void)
   vTaskDelete(hndTask1);
   vTaskDelete(hndTask2);
   
+  xTraceDisable();  
 }
   
 

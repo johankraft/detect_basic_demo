@@ -10,10 +10,15 @@
 /******************************************************************************
  * demo_kernel_tracing.c
  *
- * Demonstrates inter-task communication, synchronization and timing using
- * FreeRTOS queue and mutex with variable execution time.
+ * Demonstrates RTOS tracing for Percepio tracing tools, including queue and
+ * mutex usage with custom object names. This example can be used with any
+ * TraceRecorder configuration, also continuous streaming, but the default
+ * configuration is for snapshots using the RingBuffer streamport module.
  *
- * See also https://percepio.com/tracealyzer.
+ * For information on recording and viewing TraceRecorder traces, please refer
+ * to https://percepio.com/tracealyzer/gettingstarted.
+ *
+ * Learn more in main.c and at https://percepio.com/tracealyzer.
  *****************************************************************************/
 
 #define QUEUE_LENGTH 10
@@ -27,31 +32,8 @@ static void vTask2(void *pvParameters);
 static void vTask3(void *pvParameters);
 
 static void dummy_exectime(int min, int max);
-
+        
 void vTask1(void *pvParameters)
-{
-    (void) pvParameters;
-
-    TickType_t xLastWakeTime;
-    const TickType_t xFrequency = pdMS_TO_TICKS(10);
-    
-    xLastWakeTime = xTaskGetTickCount();
-    
-    for (;;)
-    {
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
-        dummy_exectime(6000, 7000);
-    
-        // Send dummy message to queue
-        int msg = rand();
-        xQueueSend(xQueue, &msg, 0);
-    
-    }
-}
-        
-        
-void vTask2(void *pvParameters)
 {
     (void) pvParameters;
     
@@ -63,15 +45,38 @@ void vTask2(void *pvParameters)
         if (xQueueReceive(xQueue, &msg, portMAX_DELAY) == pdPASS)
         {
 
-            dummy_exectime(5000, 6000);
+            dummy_exectime(500, 700);
             
             xSemaphoreTake(xMutex, portMAX_DELAY);
-            dummy_exectime(3000, 5000);
-            xSemaphoreGive(xMutex);                       
+            dummy_exectime(9000, 12000);
+            xSemaphoreGive(xMutex);    
+            
+            dummy_exectime(1000, 2000);
         }
     }
 }
 
+void vTask2(void *pvParameters)
+{
+    (void) pvParameters;
+
+    TickType_t xLastWakeTime;
+    const TickType_t xFrequency = pdMS_TO_TICKS(9);
+    
+    xLastWakeTime = xTaskGetTickCount();
+    
+    for (;;)
+    {
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        dummy_exectime(4000, 5000);
+    
+        // Send dummy message to queue
+        int msg = rand();
+        xQueueSend(xQueue, &msg, 0);
+    
+    }
+}
 
 void vTask3(void *pvParameters)
 {
@@ -79,13 +84,15 @@ void vTask3(void *pvParameters)
     
     for (;;)
     {        
+        dummy_exectime(1500, 2000);   
+      
         xSemaphoreTake(xMutex, portMAX_DELAY);
-        dummy_exectime(3000, 5000);
+        dummy_exectime(490, 510);
         xSemaphoreGive(xMutex);
         
-        dummy_exectime(3000, 4000);   
-         
-        vTaskDelay(pdMS_TO_TICKS(11));
+        dummy_exectime(900, 1100);   
+                 
+        vTaskDelay(pdMS_TO_TICKS(5));
     
     }
 }
@@ -97,8 +104,9 @@ void demo_kernel_tracing(void)
     TaskHandle_t hndTask2 = NULL;
     TaskHandle_t hndTask3 = NULL;
 
-    /* Note: The TraceRecorder library must be initialized first (see main.c) */
-    
+    /* Resets and start the TraceRecorder tracing. */
+    xTraceEnable(TRC_START);    
+  
     // Create queue
     xQueue = xQueueCreate(QUEUE_LENGTH, QUEUE_ITEM_SIZE);
     
@@ -116,31 +124,30 @@ void demo_kernel_tracing(void)
     vTraceSetMutexName(xMutex, "My Mutex");
     
     
-    printf("\n\demo_kernel_tracing - Demonstrates RTOS tracing with TraceRecorder.\n\r"
+    printf("\n\rdemo_kernel_tracing - Demonstrates RTOS tracing with TraceRecorder.\n\r"
              "Halt the execution after some second, then take a snapshot\n\r"
-             "of the trace buffer and open in Percepio Tracealyzer.\n\r\n\r" );
+             "of the trace buffer and view it in Tracealyzer.\n\r"
+             "See comments in demo_kernel_tracing.c for further information.\n\r\n\r" );   
     
-    /* To learn how to take snapshots from TraceRecorder and see them in Tracealyzer,
-       see https://percepio.com/tracealyzer/gettingstarted/ and scroll down to 
-       "Guides for specific development tools", or consult the Tracealyzer User Manual. */
-    
+  
     xTaskCreate(
         vTask1,
         "vTask1",
+        configMINIMAL_STACK_SIZE * 4,
+        NULL,
+        tskIDLE_PRIORITY + 2,
+        &hndTask2
+    );
+    
+     xTaskCreate(
+        vTask2,
+        "vTask2",
         configMINIMAL_STACK_SIZE * 4,
         NULL,
         tskIDLE_PRIORITY + 3,
         &hndTask1
     );
     
-    xTaskCreate(
-        vTask2,
-        "vTask2",
-        configMINIMAL_STACK_SIZE * 4,
-        NULL,
-        tskIDLE_PRIORITY + 2,
-        &hndTask2
-    );
     
     xTaskCreate(
         vTask3,
@@ -160,6 +167,8 @@ void demo_kernel_tracing(void)
     // Delete queue and mutex
     vQueueDelete(xQueue);
     vSemaphoreDelete(xMutex);
+    
+    xTraceDisable();
 }
 
 static void dummy_exectime(int min, int max)

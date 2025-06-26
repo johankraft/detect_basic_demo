@@ -19,55 +19,69 @@
  * Learn more in main.c and at https://percepio.com/detect.
  *****************************************************************************/
 
-#define ASSERT(x, msg) if(!(x)) { DFM_TRAP(DFM_TYPE_ASSERT_FAILED, msg, 0); return;}
+// Used for TraceRecorder application logging
+static TraceStringHandle_t demo_log_chn;
 
-void functionY(int arg1)
+#define ASSERT(x, msg, ret) if(!(x)) { DFM_TRAP(DFM_TYPE_ASSERT_FAILED, msg, 0); return ret;}
+
+int functionY(int arg1)
 {
-   /* If this assert fails, it calls DFM_TRAP to output an "alert" from DFM
-      to Percepio Detect (core dump and trace). */
-  
-   ASSERT(arg1 >= 0, "Assert failed, arg1 negative");
-
-   printf("functionY(%d)\n", arg1);
+   if(arg1 < 0)  // Or use an ASSERT macro like above, but this is clearer.
+   {
+     /* Output an "alert" from DFM to Percepio Detect (core dump and trace).
+        Third argument is if to restart (=1) or not (=0). */     
+     DFM_TRAP(DFM_TYPE_ASSERT_FAILED, "Assert failed, arg1 negative", 0);
+     
+     return -1;
+   }
+   
+   xTracePrintF(demo_log_chn, "In functionY(%d)\n", arg1);
+   
+   return arg1;
 }
 
-void functionX(int a, int b)
+int functionX(int a, int b)
 {
    if (a > b)
    {
-     functionY(a);
+     return functionY(a);
    }
    else
    {
-     functionY(b);
+     return functionY(b);
    }  
 }
   
-TraceStringHandle_t demo_log_chn;
-
 void demo_alert(void)
 {  
-   /* Note: The DFM library and TraceRecorder must be initialized first (see main.c) */
-      
-   xTraceStringRegister("Demo Log", &demo_log_chn);  
-
+   int ret;
+   
+   /* Note: The DFM library is initialized in main.c. */
+   
    printf("\n\rdemo_alert.c - A bad function argument causes a DFM alert.\n\r\n\r"
            "The error will be reported to Percepio Detect using the DFM library.\n\r"
            "When DFM data has been ingested by the Detect receiver, an alert will appear\n\r"
            "in the dashboard, with a Tracealyzer trace and a core dump providing\n\r"
            "the function call stack, arguments and local variables.\n\n");
    
-   vTaskDelay(2000);
-         
-   for(volatile int i = 0; i < 100000; i++); // Simulate some processing
+   vTaskDelay(2500);
    
-   // Valid function arguments
-   functionX(3, 4); 
+   /* Resets and start the TraceRecorder tracing. */
+   xTraceEnable(TRC_START);
    
-   // Invalid arguments, triggering an alert.
-   functionX(-1, -3); 
+   vTaskDelay(1);
+
+   xTraceStringRegister("Demo Log", &demo_log_chn);
+      
+   xTracePrint(demo_log_chn, "Case 1");   
+   ret = functionX(3, 4); // Valid function arguments
+   xTracePrintF(demo_log_chn, "Return value: %d", ret);
+      
+   xTracePrint(demo_log_chn, "Case 2");
+   ret = functionX(-1, -3); // Invalid arguments, triggering an ASSERT -> DFM alert.
+   xTracePrintF(demo_log_chn, "Return value: %d", ret);
    
-   
+   xTraceDisable();
     
 }
   

@@ -156,7 +156,7 @@ int main(void)
   BSP_COM_Init(COM1, &hDiscoUart);
   
   printf("Initializing TraceRecorder library.\n\r");
-  if (xTraceEnable(TRC_START) == TRC_FAIL)
+  if (xTraceInitialize() == TRC_FAIL)
   {
       printf("\n\r  ERROR: TraceRecorder failed to initialize\n\r");
   }
@@ -189,7 +189,7 @@ void vTaskDemoDriver(void *pvParameters)
 {
     (void) pvParameters;
     
-    printf("\n\rPercepio demo starting up\n\r\n\r");
+    printf("\n\rPercepio demo starting up\n\r");
     
     for (;;)
     {     
