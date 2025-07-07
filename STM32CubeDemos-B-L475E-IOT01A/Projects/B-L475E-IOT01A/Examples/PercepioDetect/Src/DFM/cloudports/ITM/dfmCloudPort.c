@@ -28,6 +28,14 @@ static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle);
 		ITM->PORT[__port].u32 = __data;    /* Write the data */ \
 }
 
+/* This blocks until there is room in the ITM FIFO (TPIU) */
+#define itm_write_8(__port, __data) \
+{\
+		while (ITM->PORT[__port].u8 == 0) { /* Do nothing */ } \
+		ITM->PORT[__port].u8 = __data;    /* Write the data */ \
+}
+
+
 void prvItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
 {
 	uint32_t* ptr32 = (uint32_t*)ptrData;
@@ -50,10 +58,18 @@ void prvItmWrite(void* ptrData, uint32_t size, int32_t* ptrBytesWritten)
 	}
 }
 
-uint8_t dummyFlushData[12] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x1E, 0x1F, 0x0C, '\n', '\r'};
  
-/* When using ITM logging with IAR, this helps flushing the data to the log file after an alert. 
-   Might not be needed in all cases.
+/* When using ITM logging over STLINK v2 together with IAR Embedded Workbench,
+   the last ~2 KB of data is sometimes not emitted to the log file until more
+   data is written. It seems there is some buffer that isn't always flushed.
+   
+   As a workaround, use vDfmCloudPortFlushWithDummyData to emit 2 KB of dummy
+   data after each alert to ensure all DFM data is written to the ITM log file. 
+   This extra data in between the DFM alerts is ignored by the bin2alerts script
+   so is not ingested by Percepio Detect.
+
+   This issues seems to be specific for STLINK probes. IAR i-jet probes does not
+   seem to have this issue and has worked fine without the flushing in our tests.
 
    To use this, add the following in your dfmConfig.h:
 
@@ -63,11 +79,8 @@ uint8_t dummyFlushData[12] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x1E, 0x
 */
 void vDfmCloudPortFlushWithDummyData(void)
 {
-   int32_t bytesWritten = 0;
-   
-   for (int i=0; i < 200; i++)
-       prvItmWrite(&dummyFlushData, sizeof(dummyFlushData), &bytesWritten);
-   
+   for (int i=0; i < 512; i++)
+       itm_write_32(2, 0xA5A5A5A5);
 }
 
 static DfmResult_t prvSerialPortUploadEntry(DfmEntryHandle_t xEntryHandle)
